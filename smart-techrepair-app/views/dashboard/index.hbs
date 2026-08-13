@@ -1,0 +1,57 @@
+<div class="dashboard">
+  <div class="metrics-grid">
+    <div class="metric-card metric-primary">
+      <div class="metric-icon">📋</div>
+      <div class="metric-content">
+        <div class="metric-value">{{metrics.pendingOrders}}</div>
+        <div class="metric-label">Đơn chờ xử lý</div>
+      </div>
+      <a href="/service-orders?status=Created" class="metric-link">Xem chi tiết →</a>
+    </div>
+    <div class="metric-card metric-warning">
+      <div class="metric-icon">💬</div>
+      <div class="metric-content">
+        <div class="metric-value">{{metrics.pendingQuotes}}</div>
+        <div class="metric-label">Báo giá chờ duyệt</div>
+      </div>
+      <a href="/service-orders?status=Quoted" class="metric-link">Xem chi tiết →</a>
+    </div>
+    <div class="metric-card metric-success">
+      <div class="metric-icon">💰</div>
+      <div class="metric-content">
+        <div class="metric-value" id="revenueToday">{{formatCurrency metrics.revenueToday}}</div>
+        <div class="metric-label">Doanh thu hôm nay</div>
+      </div>
+      <a href="/reports" class="metric-link">Xem báo cáo →</a>
+    </div>
+    <div class="metric-card metric-info">
+      <div class="metric-icon">🔩</div>
+      <div class="metric-content">
+        <div class="metric-value">{{metrics.availableParts}}</div>
+        <div class="metric-label">Linh kiện sẵn có</div>
+      </div>
+      <a href="/inventory/parts" class="metric-link">Quản lý kho →</a>
+    </div>
+  </div>
+  <div class="dashboard-actions">
+    <h2 class="section-title">Thao tác nhanh</h2>
+    <div class="action-grid">
+      <a href="/service-orders" class="action-card">
+        <span class="action-icon">📋</span>
+        <span>Danh sách đơn</span>
+      </a>
+      <a href="/inventory/parts" class="action-card">
+        <span class="action-icon">🔩</span>
+        <span>Quản lý linh kiện</span>
+      </a>
+      <a href="/reports" class="action-card">
+        <span class="action-icon">📈</span>
+        <span>Xem báo cáo</span>
+      </a>
+      <a href="/tracking" target="_blank" class="action-card">
+        <span class="action-icon">🔍</span>
+        <span>Tra cứu đơn</span>
+      </a>
+    </div>
+  </div>
+</div>

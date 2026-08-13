@@ -1,0 +1,125 @@
+{{#if found}}
+<div class="tracking-result">
+  {{#if approved}}
+    <div class="alert alert-success">✅ Báo giá đã được chấp nhận thành công! Kỹ thuật viên sẽ bắt đầu sửa chữa thiết bị của bạn.</div>
+  {{/if}}
+  {{#if rejected}}
+    <div class="alert alert-warning">❌ Bạn đã từ chối báo giá. Vui lòng liên hệ cửa hàng để nhận lại thiết bị.</div>
+  {{/if}}
+
+  <div class="tracking-header">
+    <h2>Đơn hàng <code>{{trackingCode}}</code></h2>
+    <span class="badge badge-lg {{statusBadge order.status}}">{{statusLabel order.status}}</span>
+  </div>
+
+  {{#if device}}
+  <div class="info-card">
+    <h3>🖥️ Thông tin thiết bị tiếp nhận</h3>
+    <div class="info-grid">
+      <div><span class="label">Loại thiết bị:</span> {{device.deviceType}}</div>
+      <div><span class="label">Hãng sản xuất:</span> {{device.brand}}</div>
+      <div><span class="label">Model:</span> {{device.model}}</div>
+      {{#if device.serialIMEI}}<div><span class="label">Serial/IMEI:</span> <code>{{device.serialIMEI}}</code></div>{{/if}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if photos.length}}
+  <div class="info-card">
+    <h3>📷 Ảnh kiểm tra ngoại quan thiết bị (Before Audit)</h3>
+    <div class="photos-grid">
+      {{#each photos}}
+      <div class="photo-item">
+        <img src="{{photoUrl}}" alt="Ảnh {{photoType}}" loading="lazy">
+        <span class="photo-type">{{photoType}}</span>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if quote}}
+  <div class="info-card {{#if isQuoted}}card-highlight{{/if}}">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>💰 Chi tiết Báo Giá Sửa Chữa</h3>
+      <span class="badge {{#if isApproved}}badge-success{{/if}}{{#if isQuoted}}badge-warning{{/if}}{{#if isRejected}}badge-danger{{/if}}">
+        {{#if isApproved}}ĐÃ CHẤP NHẬN{{/if}}{{#if isQuoted}}CHỜ XÁC NHẬN{{/if}}{{#if isRejected}}ĐÃ TỪ CHỐI{{/if}}
+      </span>
+    </div>
+
+    <div class="quote-detail" style="margin-top: 14px;">
+      <div class="quote-row">
+        <span>Phí nhân công sửa chữa:</span>
+        <strong>{{formatCurrency quote.totalLaborCost}}</strong>
+      </div>
+      <div class="quote-row">
+        <span>Chi phí linh kiện thay thế:</span>
+        <strong>{{formatCurrency quote.totalPartsCost}}</strong>
+      </div>
+      <div class="quote-row quote-total">
+        <span>TỔNG CHI PHÍ BÁO GIÁ:</span>
+        <strong class="total-amount">{{formatCurrency (add quote.totalLaborCost quote.totalPartsCost)}}</strong>
+      </div>
+    </div>
+
+    {{#if parts.length}}
+    <h4>Chi tiết linh kiện thay thế:</h4>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">
+      Tình trạng từng linh kiện được hiển thị rõ để quý khách xác nhận: <strong>Mới 100%</strong> hoặc <strong>Đã qua sử dụng</strong>.
+    </p>
+    <ul class="parts-list">
+      {{#each parts}}
+      <li style="margin-bottom: 8px;">
+        <strong>{{name}}</strong>
+        <span class="badge {{partConditionBadge status}}" style="margin-left: 8px; font-weight: 600;">
+          {{partConditionLabel status}}
+        </span>
+        <span style="margin-left: 8px;">(Mã: <code>{{serialIMEI}}</code>)</span>
+        — <strong style="color: var(--accent-green);">{{formatCurrency price}}</strong> × {{quantity}}
+      </li>
+      {{/each}}
+    </ul>
+    {{/if}}
+
+    <!-- Khung xác nhận Báo giá trực tuyến -->
+    {{#if isQuoted}}
+    <div class="quote-actions-panel" style="margin-top: 24px; padding-top: 16px; border-top: 2px dashed var(--accent-yellow);">
+      <p class="quote-prompt" style="font-size: 15px; font-weight: 600; color: var(--accent-yellow); margin-bottom: 14px;">
+        👉 Quý khách vui lòng xác nhận Báo giá bên trên để cửa hàng tiến hành sửa chữa:
+      </p>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <form action="/tracking/approve" method="POST" style="margin:0;">
+          <input type="hidden" name="trackingCode" value="{{trackingCode}}">
+          <input type="hidden" name="phone" value="{{phone}}">
+          <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('XÁC NHẬN: Bạn có chắc chắn muốn CHẤP NHẬN báo giá sửa chữa này không?')">
+            ✅ ĐỒNG Ý CHẤP NHẬN BÁO GIÁ
+          </button>
+        </form>
+
+        <form action="/tracking/reject" method="POST" style="margin:0;">
+          <input type="hidden" name="trackingCode" value="{{trackingCode}}">
+          <input type="hidden" name="phone" value="{{phone}}">
+          <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('XÁC NHẬN: Bạn có chắc chắn muốn TỪ CHỐI báo giá này không?')">
+            ❌ TỪ CHỐI BÁO GIÁ
+          </button>
+        </form>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  <div class="tracking-back" style="margin-top: 16px;">
+    <a href="/tracking" class="btn btn-outline">← Tra cứu đơn khác</a>
+  </div>
+</div>
+{{else}}
+<div class="auth-card">
+  <div class="empty-result">
+    <span class="empty-icon">❌</span>
+    <h2>Không tìm thấy đơn hàng</h2>
+    <p>{{error}}</p>
+    <a href="/tracking" class="btn btn-primary" style="margin-top: 12px;">Thử lại</a>
+  </div>
+</div>
+{{/if}}

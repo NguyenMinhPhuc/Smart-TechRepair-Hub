@@ -1,0 +1,100 @@
+<div class="page-header">
+  <h1>Quản lý Danh mục Linh kiện</h1>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openCreateCatModal()">+ Thêm danh mục mới</button>
+  </div>
+</div>
+
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Mã CategoryId</th>
+        <th>Tên danh mục</th>
+        <th>Mô tả</th>
+        <th>Số lượng linh kiện</th>
+        <th>Ngày tạo</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each categories}}
+      <tr>
+        <td><code class="tracking-code">{{CategoryId}}</code></td>
+        <td><strong>{{Name}}</strong></td>
+        <td>{{Description}}</td>
+        <td><span class="badge badge-info">{{PartCount}} linh kiện</span></td>
+        <td>{{formatDate CreatedAt}}</td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="deleteCategory('{{CategoryId}}')">Xóa</button>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="6" class="empty-state">Chưa có danh mục nào.</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Thêm Danh Mục Mới -->
+<div class="modal-overlay" id="createCatModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>📁 Thêm Danh Mục Linh Kiện</h3>
+      <button class="modal-close" onclick="closeCreateCatModal()">×</button>
+    </div>
+    <form id="createCatForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tên danh mục (*)</label>
+        <input type="text" name="name" class="form-control" placeholder="Màn hình, Pin, Bo mạch..." required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mô tả chi tiết</label>
+        <textarea name="description" class="form-control" rows="3" placeholder="Mô tả về loại linh kiện trong danh mục này..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeCreateCatModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tạo danh mục</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCreateCatModal() { document.getElementById('createCatModal').style.display = 'flex'; }
+function closeCreateCatModal() { document.getElementById('createCatModal').style.display = 'none'; }
+
+document.getElementById('createCatForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = {
+    name: formData.get('name'),
+    description: formData.get('description'),
+  };
+
+  try {
+    const res = await fetch('/api/inventory/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Tạo danh mục thất bại');
+    showToast('Đã tạo danh mục mới!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Tạo danh mục thất bại', 'error'); }
+});
+
+async function deleteCategory(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return;
+  try {
+    const res = await fetch(`/api/inventory/categories/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
+    showToast('Đã xóa danh mục!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); }
+}
+</script>

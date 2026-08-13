@@ -1,0 +1,154 @@
+<div class="page-header">
+  <h1>Quản lý Linh kiện</h1>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openCreatePartModal()">+ Thêm linh kiện mới</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="GET" class="filter-form">
+    <select name="categoryId" class="form-control form-control-sm" onchange="this.form.submit()">
+      <option value="">Tất cả danh mục</option>
+      {{#each categories}}
+        <option value="{{CategoryId}}" {{#eq CategoryId ../currentCategory}}selected{{/eq}}>{{Name}}</option>
+      {{/each}}
+    </select>
+    <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="New" {{#eq currentStatus 'New'}}selected{{/eq}}>Mới</option>
+      <option value="Used" {{#eq currentStatus 'Used'}}selected{{/eq}}>Đã dùng</option>
+      <option value="Damaged" {{#eq currentStatus 'Damaged'}}selected{{/eq}}>Hỏng</option>
+    </select>
+  </form>
+  <div class="filter-total">Tổng: <strong>{{total}}</strong> linh kiện</div>
+</div>
+
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Mã PartId</th>
+        <th>Tên linh kiện</th>
+        <th>Serial/IMEI</th>
+        <th>Danh mục</th>
+        <th>Trạng thái</th>
+        <th>Giá (VNĐ)</th>
+        <th>Ngày nhập</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each parts}}
+      <tr>
+        <td><code class="tracking-code" title="{{PartId}}">{{PartId}}</code></td>
+        <td><strong>{{Name}}</strong></td>
+        <td><code>{{SerialIMEI}}</code></td>
+        <td>{{CategoryName}}</td>
+        <td>
+          <span class="badge {{#eq Status 'New'}}badge-success{{/eq}}{{#eq Status 'Used'}}badge-warning{{/eq}}{{#eq Status 'Damaged'}}badge-danger{{/eq}}">
+            {{#eq Status 'New'}}Mới{{/eq}}{{#eq Status 'Used'}}Đã dùng{{/eq}}{{#eq Status 'Damaged'}}Hỏng{{/eq}}
+          </span>
+        </td>
+        <td><strong>{{formatCurrency Price}}</strong></td>
+        <td>{{formatDate CreatedAt}}</td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="deletePart('{{PartId}}')">Xóa</button>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="8" class="empty-state">Không có linh kiện nào.</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+{{#if total}}
+<div class="pagination">
+  {{#if (subtract page 1)}}
+    <a href="?categoryId={{currentCategory}}&status={{currentStatus}}&page={{subtract page 1}}" class="btn btn-outline btn-sm">← Trước</a>
+  {{/if}}
+  <span class="page-info">Trang {{page}}</span>
+  {{#if (subtract total (add (subtract page 1) limit))}}
+    <a href="?categoryId={{currentCategory}}&status={{currentStatus}}&page={{add page 1}}" class="btn btn-outline btn-sm">Tiếp →</a>
+  {{/if}}
+</div>
+{{/if}}
+
+<!-- Modal Thêm Linh Kiện Mới -->
+<div class="modal-overlay" id="createPartModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>🔩 Nhập Kho Linh Kiện Mới</h3>
+      <button class="modal-close" onclick="closeCreatePartModal()">×</button>
+    </div>
+    <form id="createPartForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tên linh kiện (*)</label>
+        <input type="text" name="name" class="form-control" placeholder="Màn hình iPhone 13 Pro Max" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Danh mục (*)</label>
+        <select name="categoryId" class="form-control" required>
+          {{#each categories}}
+          <option value="{{CategoryId}}">{{Name}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mã Serial / IMEI duy nhất (*)</label>
+        <input type="text" name="serialIMEI" class="form-control" placeholder="SN-1234567890" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Đơn giá (VNĐ) (*)</label>
+        <input type="number" name="price" class="form-control" placeholder="1200000" min="0" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeCreatePartModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary" id="submitPartBtn">Thêm vào kho</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCreatePartModal() { document.getElementById('createPartModal').style.display = 'flex'; }
+function closeCreatePartModal() { document.getElementById('createPartModal').style.display = 'none'; }
+
+document.getElementById('createPartForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = {
+    name: formData.get('name'),
+    categoryId: formData.get('categoryId'),
+    serialIMEI: formData.get('serialIMEI'),
+    price: Number(formData.get('price')),
+  };
+
+  try {
+    const res = await fetch('/api/inventory/parts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Thêm linh kiện thất bại');
+    showToast('Đã thêm linh kiện mới!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Thêm linh kiện thất bại', 'error'); }
+});
+
+async function deletePart(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa linh kiện này khỏi kho?')) return;
+  try {
+    const res = await fetch(`/api/inventory/parts/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
+    showToast('Đã xóa linh kiện!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); }
+}
+</script>

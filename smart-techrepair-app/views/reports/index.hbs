@@ -1,0 +1,76 @@
+<div class="page-header">
+  <h1>Báo cáo & Thống kê</h1>
+</div>
+
+<form method="GET" class="filter-form filter-card">
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">Từ ngày</label>
+      <input type="date" name="from" class="form-control" value="{{fromDate}}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Đến ngày</label>
+      <input type="date" name="to" class="form-control" value="{{toDate}}">
+    </div>
+    <div class="form-group form-group-action">
+      <button type="submit" class="btn btn-primary">Xem báo cáo</button>
+    </div>
+  </div>
+</form>
+
+<div class="metrics-grid">
+  <div class="metric-card metric-success">
+    <div class="metric-icon">💰</div>
+    <div class="metric-content">
+      <div class="metric-value">{{formatCurrency revenue.totalGrossRevenue}}</div>
+      <div class="metric-label">Tổng doanh thu</div>
+    </div>
+  </div>
+  <div class="metric-card metric-primary">
+    <div class="metric-icon">📋</div>
+    <div class="metric-content">
+      <div class="metric-value">{{revenue.totalCompletedOrders}}</div>
+      <div class="metric-label">Đơn hoàn thành</div>
+    </div>
+  </div>
+  <div class="metric-card metric-info">
+    <div class="metric-icon">🔧</div>
+    <div class="metric-content">
+      <div class="metric-value">{{formatCurrency revenue.totalLaborRevenue}}</div>
+      <div class="metric-label">Doanh thu nhân công</div>
+    </div>
+  </div>
+  <div class="metric-card metric-warning">
+    <div class="metric-icon">🔩</div>
+    <div class="metric-content">
+      <div class="metric-value">{{formatCurrency revenue.totalPartsRevenue}}</div>
+      <div class="metric-label">Doanh thu linh kiện</div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <h2 class="section-title" style="padding: 16px 16px 0;">Năng suất Kỹ thuật viên</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Kỹ thuật viên</th>
+        <th>Email</th>
+        <th>Đơn hoàn thành</th>
+        <th>Thời gian TB (giờ)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each productivity}}
+      <tr>
+        <td><strong>{{technicianName}}</strong></td>
+        <td>{{email}}</td>
+        <td>{{totalCompletedOrders}}</td>
+        <td>{{avgProcessingHours}}h</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="4" class="empty-state">Không có dữ liệu trong khoảng thời gian này.</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

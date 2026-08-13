@@ -1,0 +1,164 @@
+<div class="page-header">
+  <h1>Đơn Sửa Chữa</h1>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openCreateOrderModal()">+ Tạo đơn mới</button>
+    <a href="/api/docs#tag/Service-Orders" target="_blank" class="btn btn-outline">API Docs</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="GET" class="filter-form">
+    <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+      <option value="">Tất cả trạng thái</option>
+      {{#each statuses}}
+        <option value="{{this}}" {{#eq this ../currentStatus}}selected{{/eq}}>{{statusLabel this}}</option>
+      {{/each}}
+    </select>
+  </form>
+  <div class="filter-total">Tổng: <strong>{{total}}</strong> đơn</div>
+</div>
+
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Mã đơn</th>
+        <th>Khách hàng</th>
+        <th>Thiết bị</th>
+        <th>Trạng thái</th>
+        <th>Kỹ thuật viên</th>
+        <th>Ngày tạo</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each orders}}
+      <tr>
+        <td><code class="tracking-code">{{TrackingCode}}</code></td>
+        <td>
+          <div class="customer-info">
+            <strong>{{FullName}}</strong>
+            <small>{{Phone}}</small>
+          </div>
+        </td>
+        <td>{{Brand}} {{Model}} ({{DeviceType}})</td>
+        <td><span class="badge {{statusBadge Status}}">{{statusLabel Status}}</span></td>
+        <td>{{#if TechnicianName}}{{TechnicianName}}{{else}}<span class="text-muted">Chưa gán</span>{{/if}}</td>
+        <td>{{formatDate CreatedAt}}</td>
+        <td>
+          <a href="/service-orders/{{OrderId}}" class="btn btn-sm btn-outline">Xem chi tiết</a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="7" class="empty-state">Không có đơn hàng nào.</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+{{#if total}}
+<div class="pagination">
+  {{#if (subtract page 1)}}
+    <a href="?status={{currentStatus}}&page={{subtract page 1}}" class="btn btn-outline btn-sm">← Trước</a>
+  {{/if}}
+  <span class="page-info">Trang {{page}}</span>
+  {{#if (subtract total (add (subtract page 1) limit))}}
+    <a href="?status={{currentStatus}}&page={{add page 1}}" class="btn btn-outline btn-sm">Tiếp →</a>
+  {{/if}}
+</div>
+{{/if}}
+
+<!-- Modal Tạo Đơn Mới -->
+<div class="modal-overlay" id="createOrderModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>📋 Tiếp nhận Thiết bị & Tạo Đơn Sửa Chữa</h3>
+      <button class="modal-close" onclick="closeCreateOrderModal()">×</button>
+    </div>
+    <form id="createOrderForm" class="modal-body" enctype="multipart/form-data">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Số điện thoại KH (*)</label>
+          <input type="tel" id="orderPhone" name="phone" class="form-control" placeholder="0912345678" pattern="[0-9]{10}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên khách hàng (*)</label>
+          <input type="text" id="orderFullName" name="fullName" class="form-control" placeholder="Nguyễn Văn A" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email khách hàng</label>
+        <input type="email" id="orderEmail" name="email" class="form-control" placeholder="khachhang@gmail.com">
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">Loại thiết bị (*)</label>
+          <select name="deviceType" class="form-control" required>
+            <option value="Điện thoại">Điện thoại</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Máy tính bảng">Máy tính bảng</option>
+            <option value="Đồng hồ thông minh">Đồng hồ thông minh</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hãng (*)</label>
+          <input type="text" name="brand" class="form-control" placeholder="Apple, Samsung, Dell..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model (*)</label>
+          <input type="text" name="model" class="form-control" placeholder="iPhone 13, XPS 15..." required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mô tả lỗi ban đầu (*)</label>
+        <textarea name="issueDescription" class="form-control" rows="3" placeholder="Màn hình vỡ, không lên nguồn, trầy xước góc trái..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ảnh ngoại quan thiết bị (Bắt buộc ≥1 ảnh) (*)</label>
+        <input type="file" name="photo" class="form-control" accept="image/*" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeCreateOrderModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary" id="submitOrderBtn">Tạo đơn sửa chữa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCreateOrderModal() {
+  document.getElementById('createOrderModal').style.display = 'flex';
+}
+function closeCreateOrderModal() {
+  document.getElementById('createOrderModal').style.display = 'none';
+}
+
+document.getElementById('createOrderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitOrderBtn');
+  btn.textContent = 'Đang xử lý...';
+  btn.disabled = true;
+
+  const formData = new FormData(e.target);
+
+  try {
+    const res = await fetch('/api/service-orders', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Tạo đơn hàng thất bại');
+    showToast(`Đã tạo đơn sửa chữa thành công! Mã đơn: ${data.data?.trackingCode || ''}`);
+    setTimeout(() => window.location.reload(), 1000);
+  } catch(err) { 
+    showToast(err.message || 'Tạo đơn thất bại', 'error');
+    btn.textContent = 'Tạo đơn sửa chữa';
+    btn.disabled = false;
+  }
+});
+</script>

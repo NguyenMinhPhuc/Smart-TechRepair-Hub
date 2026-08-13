@@ -1,0 +1,509 @@
+<div class="page-header">
+  <h1>Chi tiết Đơn hàng <code>{{order.TrackingCode}}</code></h1>
+  <div class="page-actions">
+    <a href="/service-orders/{{order.OrderId}}/receipt" target="_blank" class="btn btn-primary">🖨️ In Phiếu Tiếp Nhận</a>
+    <button class="btn btn-outline" onclick="openUpdateStatusModal()">🔄 Cập nhật Trạng thái</button>
+    <button class="btn btn-success" onclick="openCreateQuoteModal()">💰 Lập / Sửa Báo giá</button>
+    <button class="btn btn-outline" onclick="openUploadPhotoModal()">📷 Upload Ảnh mới</button>
+    <a href="/service-orders" class="btn btn-outline">← Danh sách đơn</a>
+  </div>
+</div>
+
+<div class="info-card-grid">
+  <div class="info-card">
+    <h3>👤 Thông tin khách hàng</h3>
+    <div class="info-grid">
+      <div><span class="label">Họ tên:</span> <strong>{{order.FullName}}</strong></div>
+      <div><span class="label">Số điện thoại:</span> {{order.Phone}}</div>
+      {{#if order.Email}}<div><span class="label">Email:</span> {{order.Email}}</div>{{/if}}
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>🖥️ Thông tin thiết bị</h3>
+    <div class="info-grid">
+      <div><span class="label">Loại:</span> {{order.DeviceType}}</div>
+      <div><span class="label">Hãng:</span> {{order.Brand}}</div>
+      <div><span class="label">Model:</span> {{order.Model}}</div>
+      {{#if order.DeviceSerial}}<div><span class="label">Serial/IMEI:</span> <code>{{order.DeviceSerial}}</code></div>{{/if}}
+    </div>
+  </div>
+</div>
+
+<div class="info-card" style="margin-bottom: 20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h3>📝 Tình trạng & Phân công</h3>
+    <div>
+      <span class="label">Trạng thái:</span>
+      <span class="badge {{statusBadge order.Status}}">{{statusLabel order.Status}}</span>
+    </div>
+  </div>
+  <p style="margin: 12px 0;"><strong>Mô tả lỗi ban đầu:</strong> {{order.IssueDescription}}</p>
+  <div style="display:flex; align-items:center; gap: 12px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
+    <span class="label">Kỹ thuật viên phụ trách:</span>
+    <strong>{{#if order.TechnicianName}}{{order.TechnicianName}}{{else}}<span class="text-muted">Chưa gán</span>{{/if}}</strong>
+    <button class="btn btn-sm btn-outline" onclick="openAssignModal()">Gán KTV</button>
+  </div>
+</div>
+
+{{#if photos.length}}
+<div class="info-card" style="margin-bottom: 20px;">
+  <h3>📷 Ảnh ngoại quan thiết bị (Before/After Audit)</h3>
+  <div class="photos-grid">
+    {{#each photos}}
+    <div class="photo-item">
+      <img src="{{PhotoUrl}}" alt="Ảnh {{PhotoType}}" loading="lazy">
+      <span class="photo-type">{{PhotoType}}</span>
+    </div>
+    {{/each}}
+  </div>
+</div>
+{{/if}}
+
+<div class="info-card {{#eq order.Status 'Quoted'}}card-highlight{{/eq}}" style="margin-bottom: 20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h3>💰 Báo giá chi tiết & Linh kiện thay thế</h3>
+    {{#if quote}}
+    <span class="badge {{#eq quote.Status 'Approved'}}badge-success{{/eq}}{{#eq quote.Status 'Pending'}}badge-warning{{/eq}}{{#eq quote.Status 'Rejected'}}badge-danger{{/eq}}">
+      {{quote.Status}}
+    </span>
+    {{else}}
+    <span class="badge badge-outline">Chưa lập báo giá</span>
+    {{/if}}
+  </div>
+
+  {{#if quote}}
+  <div class="quote-detail" style="margin-top: 12px;">
+    <div class="quote-row">
+      <span>Phí nhân công:</span>
+      <strong>{{formatCurrency quote.TotalLaborCost}}</strong>
+    </div>
+    <div class="quote-row">
+      <span>Chi phí linh kiện:</span>
+      <strong>{{formatCurrency quote.CalculatedPartsCost}}</strong>
+    </div>
+    <div class="quote-row quote-total">
+      <span>Tổng chi phí:</span>
+      <strong class="total-amount">{{formatCurrency (add quote.TotalLaborCost quote.CalculatedPartsCost)}}</strong>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if parts.length}}
+  <h4 style="margin-top: 14px;">Linh kiện thay thế đã xuất kho:</h4>
+  <ul class="parts-list">
+    {{#each parts}}
+    <li style="margin-bottom: 8px;">
+      <strong>{{Name}}</strong>
+      <span class="badge {{partConditionBadge Status}}" style="margin-left: 8px; font-weight: 600;">
+        {{partConditionLabel Status}}
+      </span>
+      <span style="margin-left: 8px;">(Mã: <code>{{SerialIMEI}}</code>)</span>
+      — <strong>{{formatCurrency Price}}</strong> × {{Quantity}} (Danh mục: {{CategoryName}})
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  <div style="margin-top: 16px; display:flex; gap: 12px;">
+    <button class="btn btn-sm btn-primary" onclick="openAddPartModal()">🔩 + Thêm linh kiện vào đơn</button>
+    <button class="btn btn-sm btn-outline" onclick="openCreateQuoteModal()">💰 {{#if quote}}Sửa phí nhân công{{else}}Lập báo giá{{/if}}</button>
+  </div>
+</div>
+
+<!-- Modal Cập nhật Trạng thái -->
+<div class="modal-overlay" id="updateStatusModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>🔄 Cập nhật Trạng thái Đơn hàng</h3>
+      <button class="modal-close" onclick="closeModal('updateStatusModal')">×</button>
+    </div>
+    <form id="updateStatusForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Trạng thái mới (*)</label>
+        <select name="status" class="form-control" required>
+          <option value="Inspecting">Inspecting — Đang kiểm tra</option>
+          <option value="Quoted">Quoted — Đã báo giá</option>
+          <option value="Approved">Approved — Khách đồng ý</option>
+          <option value="Rejected">Rejected — Khách từ chối</option>
+          <option value="Repairing">Repairing — Đang sửa chữa</option>
+          <option value="Completed">Completed — Hoàn thành</option>
+          <option value="Cancelled">Cancelled — Hủy đơn</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ghi chú</label>
+        <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú quá trình kiểm tra/sửa chữa..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('updateStatusModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu trạng thái</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Gán KTV -->
+<div class="modal-overlay" id="assignModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>👤 Phân công Kỹ thuật viên</h3>
+      <button class="modal-close" onclick="closeModal('assignModal')">×</button>
+    </div>
+    <form id="assignForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Chọn Kỹ thuật viên (*)</label>
+        <select name="technicianId" class="form-control" required>
+          {{#each technicians}}
+          <option value="{{UserId}}">{{Username}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('assignModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu phân công</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Lập Báo Giá -->
+<div class="modal-overlay" id="createQuoteModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>💰 Lập / Cập nhật Báo Giá</h3>
+      <button class="modal-close" onclick="closeModal('createQuoteModal')">×</button>
+    </div>
+    <form id="createQuoteForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Chi phí Nhân công (VNĐ) (*)</label>
+        <input type="number" name="totalLaborCost" class="form-control" placeholder="150000" required value="{{#if quote}}{{quote.TotalLaborCost}}{{else}}150000{{/if}}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ghi chú báo giá</label>
+        <textarea name="notes" class="form-control" rows="2" placeholder="Chi tiết các hạng mục sửa chữa..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createQuoteModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu báo giá</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Thêm Linh kiện vào Báo giá -->
+<div class="modal-overlay" id="addPartModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>🔩 Thêm Linh kiện vào Đơn hàng</h3>
+      <button class="modal-close" onclick="closeModal('addPartModal')">×</button>
+    </div>
+    <form id="addPartForm" class="modal-body">
+      <div class="form-group" style="position: relative;">
+        <label class="form-label">🔍 Tìm kiếm Linh kiện sẵn có trong kho (*)</label>
+        <input type="text" id="partSearchInput" class="form-control" placeholder="Gõ tên linh kiện, mã Serial/IMEI hoặc danh mục (VD: màn hình, OLED, pin, SSD...)" autocomplete="off">
+        <div id="partSearchResults" class="search-dropdown-menu" style="display:none;"></div>
+      </div>
+
+      <!-- Khung hiển thị linh kiện đã chọn -->
+      <div id="selectedPartCard" class="selected-part-preview" style="display:none;">
+        <div class="part-preview-info">
+          <h4 id="previewPartName">Tên linh kiện</h4>
+          <p><small id="previewPartCategory">Danh mục</small> | Trạng thái: <span id="previewPartStatus">--</span> | Mã: <code id="previewPartSerial">SERIAL</code></p>
+          <strong class="text-success" id="previewPartPrice">0 VNĐ</strong>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="clearSelectedPart()">Thay đổi</button>
+      </div>
+
+      <input type="hidden" id="selectedPartId" name="partId" required>
+
+      <div class="form-group" style="margin-top: 14px;">
+        <label class="form-label">Số lượng xuất kho (*)</label>
+        <input type="number" name="quantity" class="form-control" value="1" min="1" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('addPartModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary" id="submitAddPartBtn" disabled>➕ Thêm linh kiện vào đơn</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.search-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  margin-top: 4px;
+}
+.search-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+.search-item:hover { background: var(--bg-secondary); }
+.search-item-title { font-weight: 600; font-size: 14px; }
+.search-item-sub { font-size: 12px; color: var(--text-secondary); }
+.selected-part-preview {
+  background: rgba(37,99,235,0.1);
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+</style>
+
+<!-- Modal Upload Ảnh -->
+<div class="modal-overlay" id="uploadPhotoModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>📷 Upload Ảnh Thiết Bị mới</h3>
+      <button class="modal-close" onclick="closeModal('uploadPhotoModal')">×</button>
+    </div>
+    <form id="uploadPhotoForm" class="modal-body" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label">Loại ảnh (*)</label>
+        <select name="type" class="form-control">
+          <option value="Before">Before — Ảnh trước khi sửa</option>
+          <option value="After">After — Ảnh sau khi sửa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chọn file ảnh (*)</label>
+        <input type="file" name="photo" class="form-control" accept="image/*" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('uploadPhotoModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tải ảnh lên</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const orderId = '{{order.OrderId}}';
+
+function openUpdateStatusModal() { document.getElementById('updateStatusModal').style.display = 'flex'; }
+function openAssignModal() { document.getElementById('assignModal').style.display = 'flex'; }
+function openCreateQuoteModal() { document.getElementById('createQuoteModal').style.display = 'flex'; }
+function openAddPartModal() { document.getElementById('addPartModal').style.display = 'flex'; }
+function openUploadPhotoModal() { document.getElementById('uploadPhotoModal').style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+document.getElementById('updateStatusForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = Object.fromEntries(formData.entries());
+  try {
+    const res = await fetch(`/api/service-orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại');
+    showToast('Cập nhật trạng thái thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Cập nhật thất bại', 'error'); }
+});
+
+document.getElementById('assignForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = Object.fromEntries(formData.entries());
+  try {
+    const res = await fetch(`/api/service-orders/${orderId}/assign`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gán thất bại');
+    showToast('Gán kỹ thuật viên thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Gán thất bại', 'error'); }
+});
+
+document.getElementById('createQuoteForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = {
+    totalLaborCost: Number(formData.get('totalLaborCost')),
+    notes: formData.get('notes'),
+  };
+  try {
+    const res = await fetch(`/api/quotes/${orderId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Báo giá thất bại');
+    showToast('Tạo báo giá thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Báo giá thất bại', 'error'); }
+});
+
+let searchDebounceTimer = null;
+const partSearchInput = document.getElementById('partSearchInput');
+const partSearchResults = document.getElementById('partSearchResults');
+
+if (partSearchInput) {
+  partSearchInput.addEventListener('input', (e) => {
+    clearTimeout(searchDebounceTimer);
+    const q = e.target.value.trim();
+    if (!q) {
+      partSearchResults.style.display = 'none';
+      return;
+    }
+
+    searchDebounceTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/inventory/parts/search?q=' + encodeURIComponent(q));
+        const result = await res.json();
+        const parts = Array.isArray(result) ? result : (result?.data || []);
+        renderPartSearchResults(parts);
+      } catch(err) {
+        console.error('Search error:', err);
+      }
+    }, 250);
+  });
+}
+
+function getPartStatusBadge(status) {
+  if (status === 'New' || status === 'Mới') {
+    return '<span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(16,185,129,0.2); color:#10B981; border:1px solid rgba(16,185,129,0.4); font-weight:600; margin-left:6px; display:inline-block;">✨ Mới 100%</span>';
+  } else if (status === 'Used' || status === 'Đã dùng') {
+    return '<span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(245,158,11,0.2); color:#F59E0B; border:1px solid rgba(245,158,11,0.4); font-weight:600; margin-left:6px; display:inline-block;">🛠️ Đã qua sử dụng</span>';
+  } else if (status === 'Damaged' || status === 'Hỏng') {
+    return '<span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(239,68,68,0.2); color:#EF4444; border:1px solid rgba(239,68,68,0.4); font-weight:600; margin-left:6px; display:inline-block;">⚠️ Hỏng</span>';
+  }
+  return `<span style="font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(156,163,175,0.2); color:#9CA3AF; border:1px solid rgba(156,163,175,0.4); font-weight:600; margin-left:6px; display:inline-block;">${escapeHtml(status || '')}</span>`;
+}
+
+function renderPartSearchResults(parts) {
+  const list = Array.isArray(parts) ? parts : (parts?.data || []);
+  if (!list || !list.length) {
+    partSearchResults.innerHTML = '<div class="search-item" style="color:var(--text-secondary);">Không tìm thấy linh kiện phù hợp trong kho. Hệ thống chỉ gợi ý linh kiện Mới hoặc Đã qua sử dụng.</div>';
+    partSearchResults.style.display = 'block';
+    return;
+  }
+
+  partSearchResults.innerHTML = list.map(p => `
+    <div class="search-item" onclick="selectPart('${p.PartId}', '${escapeHtml(p.Name)}', '${escapeHtml(p.CategoryName)}', '${p.SerialIMEI}', ${p.Price}, '${escapeHtml(p.Status)}')">
+      <div>
+        <div class="search-item-title">📦 ${escapeHtml(p.Name)} ${getPartStatusBadge(p.Status)}</div>
+        <div class="search-item-sub">Danh mục: ${escapeHtml(p.CategoryName)} | Mã: <code>${p.SerialIMEI}</code></div>
+      </div>
+      <div>
+        <strong style="color:var(--accent-green);">${formatCurrency(p.Price)}</strong>
+      </div>
+    </div>
+  `).join('');
+  partSearchResults.style.display = 'block';
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+}
+
+function selectPart(partId, name, category, serial, price, status) {
+  if (status !== 'New' && status !== 'Mới' && status !== 'Used' && status !== 'Đã dùng') {
+    showToast('Chỉ có thể thêm linh kiện ở trạng thái Mới hoặc Đã qua sử dụng.', 'error');
+    document.getElementById('submitAddPartBtn').disabled = true;
+    return;
+  }
+
+  document.getElementById('selectedPartId').value = partId;
+  document.getElementById('previewPartName').textContent = name;
+  document.getElementById('previewPartCategory').textContent = category;
+  document.getElementById('previewPartStatus').innerHTML = getPartStatusBadge(status);
+  document.getElementById('previewPartSerial').textContent = serial;
+  document.getElementById('previewPartPrice').textContent = formatCurrency(price);
+
+  document.getElementById('selectedPartCard').style.display = 'flex';
+  partSearchResults.style.display = 'none';
+  partSearchInput.value = '';
+  document.getElementById('submitAddPartBtn').disabled = false;
+}
+
+function clearSelectedPart() {
+  document.getElementById('selectedPartId').value = '';
+  document.getElementById('selectedPartCard').style.display = 'none';
+  document.getElementById('submitAddPartBtn').disabled = true;
+  partSearchInput.focus();
+}
+
+// Close search dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (partSearchResults && !partSearchResults.contains(e.target) && e.target !== partSearchInput) {
+    partSearchResults.style.display = 'none';
+  }
+});
+
+document.getElementById('addPartForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = {
+    partId: formData.get('partId'),
+    quantity: Number(formData.get('quantity')),
+  };
+
+  if (!body.partId) {
+    showToast('Vui lòng tìm kiếm và chọn 1 linh kiện trong kho!', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('submitAddPartBtn');
+  btn.disabled = true;
+  btn.textContent = 'Đang thêm...';
+
+  try {
+    const res = await fetch(`/api/quotes/${orderId}/parts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Thêm linh kiện thất bại');
+    showToast('Thêm linh kiện thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) {
+    showToast(err.message || 'Thêm linh kiện thất bại', 'error');
+    btn.disabled = false;
+    btn.textContent = '➕ Thêm linh kiện vào đơn';
+  }
+});
+
+document.getElementById('uploadPhotoForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const type = formData.get('type');
+  try {
+    const res = await fetch(`/api/service-orders/${orderId}/photos?type=${type}`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Upload ảnh thất bại');
+    showToast('Upload ảnh thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Upload ảnh thất bại', 'error'); }
+});
+</script>

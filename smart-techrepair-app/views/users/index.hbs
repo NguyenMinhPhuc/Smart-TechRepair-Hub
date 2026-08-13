@@ -1,0 +1,180 @@
+<div class="page-header">
+  <h1>Quản lý Người dùng System</h1>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openCreateUserModal()">+ Tạo tài khoản mới</button>
+  </div>
+</div>
+
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Tên đăng nhập</th>
+        <th>Email</th>
+        <th>Vai trò (Role)</th>
+        <th>Ngày tạo</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each users}}
+      <tr>
+        <td><strong>{{username}}</strong></td>
+        <td>{{email}}</td>
+        <td>
+          <span class="badge {{#eq role 'Admin'}}badge-danger{{else}}badge-info{{/eq}}">
+            {{role}}
+          </span>
+        </td>
+        <td>{{formatDate createdAt}}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="openEditUserModal('{{userId}}', '{{username}}', '{{email}}', '{{role}}')">Sửa</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteUser('{{userId}}')">Xóa</button>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="5" class="empty-state">Chưa có người dùng nào.</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Tạo Người Dùng Mới -->
+<div class="modal-overlay" id="createUserModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>👤 Tạo Tài Khoản Người Dùng Mới</h3>
+      <button class="modal-close" onclick="closeModal('createUserModal')">×</button>
+    </div>
+    <form id="createUserForm" class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tên đăng nhập (*)</label>
+        <input type="text" name="username" class="form-control" placeholder="technician2" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email (*)</label>
+        <input type="email" name="email" class="form-control" placeholder="ktv2@smartrepair.vn" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mật khẩu (*)</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" minlength="8" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vai trò (*)</label>
+        <select name="role" class="form-control" required>
+          <option value="Technician">Technician — Kỹ thuật viên</option>
+          <option value="Admin">Admin — Quản trị viên</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createUserModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Chỉnh Sửa Người Dùng -->
+<div class="modal-overlay" id="editUserModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>✏️ Cập Nhật Tài Khoản</h3>
+      <button class="modal-close" onclick="closeModal('editUserModal')">×</button>
+    </div>
+    <form id="editUserForm" class="modal-body">
+      <input type="hidden" id="editUserId" name="userId">
+      <div class="form-group">
+        <label class="form-label">Tên đăng nhập (*)</label>
+        <input type="text" id="editUsername" name="username" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email (*)</label>
+        <input type="email" id="editEmail" name="email" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mật khẩu mới (Để trống nếu không đổi)</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Vai trò (*)</label>
+        <select id="editRole" name="role" class="form-control" required>
+          <option value="Technician">Technician — Kỹ thuật viên</option>
+          <option value="Admin">Admin — Quản trị viên</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('editUserModal')">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCreateUserModal() { document.getElementById('createUserModal').style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function openEditUserModal(id, username, email, role) {
+  document.getElementById('editUserId').value = id;
+  document.getElementById('editUsername').value = username;
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editRole').value = role;
+  document.getElementById('editUserModal').style.display = 'flex';
+}
+
+document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = Object.fromEntries(formData.entries());
+
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Tạo tài khoản thất bại');
+    showToast('Tạo tài khoản thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Tạo tài khoản thất bại', 'error'); }
+});
+
+document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const body = Object.fromEntries(formData.entries());
+  const userId = body.userId;
+
+  try {
+    const res = await fetch(`/api/users/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại');
+    showToast('Cập nhật người dùng thành công!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Cập nhật thất bại', 'error'); }
+});
+
+async function deleteUser(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) return;
+  try {
+    const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
+    showToast('Đã xóa tài khoản!');
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); }
+}
+</script>

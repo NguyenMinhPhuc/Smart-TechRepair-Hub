@@ -1,0 +1,55 @@
+<div class="auth-card">
+  <div class="auth-logo">
+    <span class="logo-icon">🔧</span>
+    <h1 class="logo-title">Smart TechRepair Hub</h1>
+    <p class="logo-subtitle">Hệ thống Quản lý Sửa chữa Thiết bị</p>
+  </div>
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+  <form class="auth-form" id="loginForm">
+    <div class="form-group">
+      <label class="form-label" for="email">Email</label>
+      <input type="email" id="email" name="email" class="form-control" placeholder="admin@smartrepair.vn" required autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">Mật khẩu</label>
+      <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Đăng nhập</button>
+    <div class="auth-error" id="loginError" style="display:none"></div>
+  </form>
+  <div class="auth-footer">
+    <a href="/tracking" class="link">Tra cứu đơn hàng (không cần đăng nhập)</a>
+  </div>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  btn.textContent = 'Đang đăng nhập...';
+  btn.disabled = true;
+  errEl.style.display = 'none';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Đăng nhập thất bại');
+    localStorage.setItem('token', data.data.accessToken);
+    localStorage.setItem('user', JSON.stringify(data.data.user));
+    window.location.href = '/dashboard';
+  } catch(err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+    btn.textContent = 'Đăng nhập';
+    btn.disabled = false;
+  }
+});
+</script>

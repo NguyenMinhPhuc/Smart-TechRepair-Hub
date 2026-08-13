@@ -1,0 +1,110 @@
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<div class="auth-card tracking-card">
+  <div class="auth-logo">
+    <span class="logo-icon">🔍</span>
+    <h1 class="logo-title">Tra cứu Đơn sửa chữa</h1>
+    <p class="logo-subtitle">Nhập thông tin hoặc Quét mã QR trên Phiếu Tiếp Nhận</p>
+  </div>
+
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+  {{#if approved}}
+    <div class="alert alert-success">✅ Báo giá đã được chấp nhận. Chúng tôi sẽ tiến hành sửa chữa!</div>
+  {{/if}}
+  {{#if rejected}}
+    <div class="alert alert-warning">❌ Báo giá đã bị từ chối. Vui lòng đến cửa hàng để nhận lại thiết bị.</div>
+  {{/if}}
+
+  <div style="text-align: center; margin-bottom: 20px;">
+    <button type="button" class="btn btn-outline-sm" id="toggleQrBtn" onclick="toggleQrScanner()">📷 Quét mã QR bằng Camera</button>
+  </div>
+
+  <!-- Container Camera QR Scanner -->
+  <div id="qrScannerContainer" style="display: none; margin-bottom: 20px; text-align: center;">
+    <div id="qrReader" style="width: 100%; max-width: 360px; margin: 0 auto; border-radius: 8px; overflow: hidden;"></div>
+    <small class="text-muted" style="display: block; margin-top: 8px;">Đưa mã QR trên Phiếu Tiếp Nhận vào khung hình camera</small>
+  </div>
+
+  <form action="/tracking/search" method="POST" class="auth-form" id="trackingForm">
+    <div class="form-group">
+      <label class="form-label">Mã đơn hàng (Tracking Code)</label>
+      <input type="text" id="trackingCodeInput" name="trackingCode" class="form-control" placeholder="TRK-20260813-1234" required value="{{trackingCode}}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Số điện thoại đăng ký</label>
+      <input type="tel" id="phoneInput" name="phone" class="form-control" placeholder="0912345678" pattern="[0-9]{10}" required value="{{phone}}">
+    </div>
+    <button type="submit" class="btn btn-primary btn-full">Tra cứu ngay</button>
+  </form>
+
+  <div class="auth-footer">
+    <a href="/login" class="link">Đăng nhập hệ thống (Nhân viên)</a>
+  </div>
+</div>
+
+<script>
+let html5QrcodeScanner = null;
+
+function toggleQrScanner() {
+  const container = document.getElementById('qrScannerContainer');
+  const btn = document.getElementById('toggleQrBtn');
+
+  if (container.style.display === 'none') {
+    container.style.display = 'block';
+    btn.textContent = '❌ Tắt Camera Quét QR';
+
+    if (!html5QrcodeScanner) {
+      html5QrcodeScanner = new Html5QrcodeScanner('qrReader', {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+      }, false);
+
+      html5QrcodeScanner.render(onScanSuccess, onScanError);
+    }
+  } else {
+    container.style.display = 'none';
+    btn.textContent = '📷 Quét mã QR bằng Camera';
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.clear();
+      html5QrcodeScanner = null;
+    }
+  }
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+  try {
+    let code = null;
+    let phone = null;
+
+    if (decodedText.includes('code=') && decodedText.includes('phone=')) {
+      const urlParams = new URLSearchParams(decodedText.substring(decodedText.indexOf('?')));
+      code = urlParams.get('code');
+      phone = urlParams.get('phone');
+    } else if (decodedText.startsWith('TRK-')) {
+      code = decodedText.trim();
+    }
+
+    if (code) {
+      document.getElementById('trackingCodeInput').value = code;
+    }
+    if (phone) {
+      document.getElementById('phoneInput').value = phone;
+    }
+
+    if (code && phone) {
+      showToast(`Đã quét thấy mã QR: ${code}! Đang tra cứu...`, 'info');
+      document.getElementById('trackingForm').submit();
+    } else if (code) {
+      showToast(`Đã tìm thấy mã đơn: ${code}. Vui lòng nhập thêm SĐT để tra cứu.`, 'info');
+    }
+  } catch (err) {
+    console.error('Lỗi đọc dữ liệu QR:', err);
+  }
+}
+
+function onScanError(errorMessage) {
+  // Silent scan errors
+}
+</script>
