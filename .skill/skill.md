@@ -8,6 +8,7 @@ Please strictly follow the tech stack, code style, database design, and business
 - Database: Microsoft SQL Server.
 - ORM:  TypeORM 
 - Action: Implement domain-driven design principles with clear separation of concerns.
+- Architechture: Clear Architechture
 
 2. CORE BUSINESS RULES TO IMPLEMENT
 - Unique Tracking Code: Generate a unique, unguessable Tracking Code (e.g., TRK-2026X89A) for each repair ticket.
