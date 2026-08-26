@@ -40,7 +40,8 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       type: 'mssql',
       host: this.config.get<string>('DB_HOST') ?? 'localhost',
       port: this.getNumber('DB_PORT', 1433),
-      database: this.config.get<string>('DB_DATABASE') ?? 'SmartTechRepairDB_v2',
+      database:
+        this.config.get<string>('DB_DATABASE') ?? 'SmartTechRepairDB_v2',
       entities: [
         UserOrmEntity,
         CustomerOrmEntity,
@@ -57,7 +58,10 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       logging: this.config.get<string>('NODE_ENV') === 'development',
       options: {
         encrypt: this.getBoolean('DB_ENCRYPT', false),
-        trustServerCertificate: this.getBoolean('DB_TRUST_SERVER_CERTIFICATE', true),
+        trustServerCertificate: this.getBoolean(
+          'DB_TRUST_SERVER_CERTIFICATE',
+          true,
+        ),
         enableArithAbort: true,
       },
     };

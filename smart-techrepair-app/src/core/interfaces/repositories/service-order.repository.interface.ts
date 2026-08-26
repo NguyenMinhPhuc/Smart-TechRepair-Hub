@@ -15,6 +15,7 @@ export interface IServiceOrderRepository {
   findAll(filters: { status?: OrderStatus; technicianId?: string; page: number; limit: number }): Promise<{ data: ServiceOrderEntity[]; total: number }>;
   updateStatus(orderId: string, newStatus: OrderStatus, userId: string, note?: string): Promise<void>;
   assignTechnician(orderId: string, technicianId: string): Promise<void>;
+  addPhoto(orderId: string, photoUrl: string, photoType?: string): Promise<void>;
   softDelete(orderId: string): Promise<void>;
 }
 

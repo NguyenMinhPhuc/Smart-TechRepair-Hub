@@ -1,0 +1,1 @@
+$w = New-Object -ComObject Word.Application; $w.Visible = $false; try { $d = $w.Documents.Open('D:\\Projects\\CongTy\\gitproject\\Smart-TechRepair-Hub\\scratch\\docx_gen\\test_toc.docx'); Write-Host "PASS TOC"; $d.Close() } catch { Write-Host "FAIL TOC: $($_.Exception.Message)" } finally { $w.Quit() }

@@ -1,7 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+import { DataSource } from 'typeorm';
 import { ICustomerRepository, CUSTOMER_REPOSITORY } from '../../core/interfaces/repositories/customer.repository.interface';
 import { IServiceOrderRepository, SERVICE_ORDER_REPOSITORY } from '../../core/interfaces/repositories/service-order.repository.interface';
+import { RealtimeGateway } from '../../infrastructure/gateways/realtime.gateway';
 
 export interface CreateOrderInput {
   phone: string;
@@ -22,8 +25,6 @@ export interface CreateOrderResult {
   isNewCustomer: boolean;
 }
 
-import { RealtimeGateway } from '../../infrastructure/gateways/realtime.gateway';
-
 @Injectable()
 export class CreateOrderUseCase {
   constructor(
@@ -32,6 +33,7 @@ export class CreateOrderUseCase {
     @Inject(SERVICE_ORDER_REPOSITORY)
     private readonly orderRepo: IServiceOrderRepository,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly dataSource: DataSource,
   ) {}
 
   async execute(input: CreateOrderInput): Promise<CreateOrderResult> {
@@ -46,9 +48,20 @@ export class CreateOrderUseCase {
       input.email,
     );
 
-    // 2. Create order (device info embedded in issueDescription for now, DeviceId via SP)
+    // 2. Create device record if device info is provided
+    let deviceId: string | undefined;
+    if (input.deviceType || input.brand || input.model) {
+      deviceId = randomUUID();
+      await this.dataSource.query(
+        `INSERT INTO Devices (DeviceId, CustomerId, DeviceType, Brand, Model, SerialIMEI)
+         VALUES ('${deviceId}', '${customer.customerId}', N'${input.deviceType || 'Khác'}', N'${input.brand || 'Khác'}', N'${input.model || 'N/A'}', ${input.serialIMEI ? `'${input.serialIMEI}'` : 'NULL'})`,
+      );
+    }
+
+    // 3. Create order
     const { orderId, trackingCode } = await this.orderRepo.create({
       customerId: customer.customerId,
+      deviceId,
       issueDescription: input.issueDescription,
       photoUrl: input.photoUrl,
     });

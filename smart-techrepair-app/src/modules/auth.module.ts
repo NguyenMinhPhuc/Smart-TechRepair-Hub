@@ -20,8 +20,12 @@ import { AuthController } from '../presentation/api/auth.controller';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') ?? 'smart-repair-secret-key-32chars!!',
-        signOptions: { expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '15m') as any },
+        secret:
+          config.get<string>('JWT_SECRET') ??
+          'smart-repair-secret-key-32chars!!',
+        signOptions: {
+          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '15m') as any,
+        },
       }),
     }),
   ],

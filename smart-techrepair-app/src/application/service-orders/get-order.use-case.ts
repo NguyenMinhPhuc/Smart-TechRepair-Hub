@@ -2,16 +2,47 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { ServiceOrderEntity } from '../../core/domain/entities/service-order.entity';
-import { IServiceOrderRepository, SERVICE_ORDER_REPOSITORY } from '../../core/interfaces/repositories/service-order.repository.interface';
+import {
+  IServiceOrderRepository,
+  SERVICE_ORDER_REPOSITORY,
+} from '../../core/interfaces/repositories/service-order.repository.interface';
 import { OrderStatus } from '../../core/domain/enums/order-status.enum';
 
 export interface OrderDetailResult {
   order: ServiceOrderEntity;
-  photos: { photoId: string; photoUrl: string; photoType: string; uploadedAt: Date }[];
-  quote: { totalLaborCost: number; totalPartsCost: number; status: string; notes?: string } | null;
-  parts: { partId: string; name: string; serialIMEI: string; price: number; quantity: number; status: string }[];
-  customer: { customerId: string; fullName: string; phone: string; email?: string };
-  device?: { deviceId: string; deviceType: string; brand: string; model: string; serialIMEI?: string };
+  photos: {
+    photoId: string;
+    photoUrl: string;
+    photoType: string;
+    uploadedAt: Date;
+  }[];
+  quote: {
+    totalLaborCost: number;
+    totalPartsCost: number;
+    status: string;
+    notes?: string;
+  } | null;
+  parts: {
+    partId: string;
+    name: string;
+    serialIMEI: string;
+    price: number;
+    quantity: number;
+    status: string;
+  }[];
+  customer: {
+    customerId: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
+  device?: {
+    deviceId: string;
+    deviceType: string;
+    brand: string;
+    model: string;
+    serialIMEI?: string;
+  };
 }
 
 @Injectable()
@@ -28,7 +59,10 @@ export class GetOrderUseCase {
     return this.buildDetail(order);
   }
 
-  async executeByTrackingAndPhone(trackingCode: string, phone: string): Promise<OrderDetailResult> {
+  async executeByTrackingAndPhone(
+    trackingCode: string,
+    phone: string,
+  ): Promise<OrderDetailResult> {
     const rows = await this.dataSource.query(
       `SELECT SO.*, C.Phone FROM ServiceOrders SO
        INNER JOIN Customers C ON SO.CustomerId = C.CustomerId
@@ -36,13 +70,17 @@ export class GetOrderUseCase {
       [trackingCode, phone],
     );
     if (!rows || rows.length === 0) {
-      throw new NotFoundException('Thông tin không khớp hoặc đơn hàng không tồn tại.');
+      throw new NotFoundException(
+        'Thông tin không khớp hoặc đơn hàng không tồn tại.',
+      );
     }
     const order = await this.orderRepo.findByTrackingCode(trackingCode);
     return this.buildDetail(order!);
   }
 
-  private async buildDetail(order: ServiceOrderEntity): Promise<OrderDetailResult> {
+  private async buildDetail(
+    order: ServiceOrderEntity,
+  ): Promise<OrderDetailResult> {
     const [photos, quote, parts, customer, device] = await Promise.all([
       this.dataSource.query(
         `SELECT PhotoId, PhotoUrl, PhotoType, UploadedAt FROM DevicePhotos WHERE OrderId = '${order.orderId}'`,
@@ -68,10 +106,14 @@ export class GetOrderUseCase {
     return {
       order,
       photos: photos.map((p: Record<string, unknown>) => ({
-        photoId: p['PhotoId'] as string,
-        photoUrl: p['PhotoUrl'] as string,
-        photoType: p['PhotoType'] as string,
-        uploadedAt: p['UploadedAt'] as Date,
+        photoId: (p['PhotoId'] || p['photoId']) as string,
+        photoUrl: (p['PhotoUrl'] || p['photoUrl']) as string,
+        photoType: (p['PhotoType'] || p['photoType']) as string,
+        uploadedAt: (p['UploadedAt'] || p['uploadedAt']) as Date,
+        PhotoId: (p['PhotoId'] || p['photoId']) as string,
+        PhotoUrl: (p['PhotoUrl'] || p['photoUrl']) as string,
+        PhotoType: (p['PhotoType'] || p['photoType']) as string,
+        UploadedAt: (p['UploadedAt'] || p['uploadedAt']) as Date,
       })),
       quote: quote[0]
         ? {

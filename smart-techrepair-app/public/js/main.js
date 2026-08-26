@@ -199,22 +199,22 @@ function initFeatureSearch() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const token = getToken();
-  
+
   if (!token && !window.location.pathname.startsWith('/tracking') && !window.location.pathname.startsWith('/login')) {
     window.location.href = '/login';
     return;
   }
-  
+
   const user = getUser();
   const nameEl = document.getElementById('currentUserName');
   const roleEl = document.getElementById('currentUserRole');
   if (nameEl && user.username) nameEl.textContent = user.username;
   if (roleEl && user.role) roleEl.textContent = user.role;
-  
+
   const currentPath = window.location.pathname;
   document.querySelectorAll('.nav-link').forEach(link => {
-    if (link.getAttribute('href') === currentPath || 
-        (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
+    if (link.getAttribute('href') === currentPath ||
+      (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
       link.classList.add('active');
     }
   });
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const originalFetch = window.fetch;
-window.fetch = function(url, options = {}) {
+window.fetch = function (url, options = {}) {
   const token = getToken();
   if (token && typeof url === 'string' && url.startsWith('/api')) {
     options.headers = {

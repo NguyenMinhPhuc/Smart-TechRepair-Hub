@@ -5,6 +5,7 @@ export interface CreateUserParams {
   email: string;
   passwordHash: string;
   role: string;
+  isActive?: boolean;
 }
 
 export interface UpdateUserParams {
@@ -13,6 +14,7 @@ export interface UpdateUserParams {
   email: string;
   role: string;
   passwordHash?: string;
+  isActive?: boolean;
 }
 
 export interface IUserRepository {
@@ -22,6 +24,7 @@ export interface IUserRepository {
   findAll(page: number, limit: number): Promise<{ data: UserEntity[]; total: number }>;
   create(params: CreateUserParams): Promise<UserEntity>;
   update(params: UpdateUserParams): Promise<UserEntity>;
+  updateStatus(userId: string, isActive: boolean): Promise<UserEntity>;
   softDelete(userId: string): Promise<void>;
 }
 

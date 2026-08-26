@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('Categories')
 export class CategoryOrmEntity {
@@ -8,7 +13,12 @@ export class CategoryOrmEntity {
   @Column({ name: 'Name', length: 100 })
   name: string;
 
-  @Column({ name: 'Description', type: 'nvarchar', length: 500, nullable: true })
+  @Column({
+    name: 'Description',
+    type: 'nvarchar',
+    length: 500,
+    nullable: true,
+  })
   description: string | null;
 
   @Column({ name: 'IsDeleted', type: 'bit', default: false })

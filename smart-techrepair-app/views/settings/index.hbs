@@ -1,157 +1,188 @@
-<div class="page-header">
+<div class='page-header'>
   <h1>⚙️ Cấu hình Hệ thống & Cửa hàng</h1>
 </div>
 
-<div class="settings-grid">
+<div class='settings-grid'>
   <!-- Cấu hình Thông tin Cửa hàng -->
-  <div class="info-card">
+  <div class='info-card'>
     <h3>🏪 Thông tin Thương hiệu & Cửa hàng</h3>
-    <p class="text-muted" style="margin-bottom: 16px; font-size: 13px;">
-      Các thông tin dưới đây sẽ tự động hiển thị trên Tiêu đề, Hóa đơn / Phiếu Tiếp Nhận và trang Tra Cứu Khách Hàng.
+    <p class='text-muted' style='margin-bottom: 16px; font-size: 13px;'>
+      Các thông tin dưới đây sẽ tự động hiển thị trên Tiêu đề, Hóa đơn / Phiếu
+      Tiếp Nhận và trang Tra Cứu Khách Hàng.
     </p>
 
-    <form id="storeSettingsForm" class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Tên cửa hàng / Thương hiệu (*)</label>
-        <input type="text" name="storeName" class="form-control" value="{{storeSettings.storeName}}" required>
+    <form id='storeSettingsForm' class='form-grid'>
+      <div class='form-group'>
+        <label class='form-label'>Tên cửa hàng / Thương hiệu (*)</label>
+        <input
+          type='text'
+          name='storeName'
+          class='form-control'
+          value='{{storeSettings.storeName}}'
+          required
+        />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Địa chỉ trụ sở / Cửa hàng (*)</label>
-        <input type="text" name="storeAddress" class="form-control" value="{{storeSettings.storeAddress}}" required>
+      <div class='form-group'>
+        <label class='form-label'>Địa chỉ trụ sở / Cửa hàng (*)</label>
+        <input
+          type='text'
+          name='storeAddress'
+          class='form-control'
+          value='{{storeSettings.storeAddress}}'
+          required
+        />
       </div>
 
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label">Hotline / Điện thoại (*)</label>
-          <input type="text" name="storePhone" class="form-control" value="{{storeSettings.storePhone}}" required>
+      <div class='form-row-2'>
+        <div class='form-group'>
+          <label class='form-label'>Hotline / Điện thoại (*)</label>
+          <input
+            type='text'
+            name='storePhone'
+            class='form-control'
+            value='{{storeSettings.storePhone}}'
+            required
+          />
         </div>
-        <div class="form-group">
-          <label class="form-label">Email hỗ trợ (*)</label>
-          <input type="email" name="storeEmail" class="form-control" value="{{storeSettings.storeEmail}}" required>
+        <div class='form-group'>
+          <label class='form-label'>Email hỗ trợ (*)</label>
+          <input
+            type='email'
+            name='storeEmail'
+            class='form-control'
+            value='{{storeSettings.storeEmail}}'
+            required
+          />
         </div>
       </div>
 
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label">Mã số thuế</label>
-          <input type="text" name="taxCode" class="form-control" value="{{storeSettings.taxCode}}">
+      <div class='form-row-2'>
+        <div class='form-group'>
+          <label class='form-label'>Mã số thuế</label>
+          <input
+            type='text'
+            name='taxCode'
+            class='form-control'
+            value='{{storeSettings.taxCode}}'
+          />
         </div>
-        <div class="form-group">
-          <label class="form-label">Đường dẫn Logo URL</label>
-          <input type="text" name="storeLogoUrl" class="form-control" value="{{storeSettings.storeLogoUrl}}">
+        <div class='form-group'>
+          <label class='form-label'>Đường dẫn Logo URL</label>
+          <input
+            type='text'
+            name='storeLogoUrl'
+            class='form-control'
+            value='{{storeSettings.storeLogoUrl}}'
+          />
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Lời cảm ơn / Ghi chú chân Phiếu Tiếp Nhận</label>
-        <textarea name="receiptFooterNote" class="form-control" rows="2">{{storeSettings.receiptFooterNote}}</textarea>
+      <div class='form-group'>
+        <label class='form-label'>Lời cảm ơn / Ghi chú chân Phiếu Tiếp Nhận</label>
+        <textarea
+          name='receiptFooterNote'
+          class='form-control'
+          rows='2'
+        >{{storeSettings.receiptFooterNote}}</textarea>
       </div>
 
-      <div style="margin-top: 16px;">
-        <button type="submit" class="btn btn-primary" id="saveStoreBtn">💾 Lưu thông tin Cửa hàng</button>
+      <div style='margin-top: 16px;'>
+        <button type='submit' class='btn btn-primary' id='saveStoreBtn'>💾 Lưu
+          thông tin Cửa hàng</button>
       </div>
     </form>
   </div>
 
   <!-- Quản trị & Bảo trì Hệ thống -->
-  <div class="info-card card-highlight-danger">
-    <h3 style="color: var(--accent-red);">⚠️ Bảo trì & Dữ liệu Hệ thống</h3>
-    <p class="text-muted" style="margin-bottom: 20px; font-size: 13px;">
-      Các công cụ dưới đây cho phép reset dữ liệu để bàn giao triển khai cho chi nhánh/cửa hàng mới hoặc tạo dữ liệu mẫu để thử nghiệm.
+  <div class='info-card card-highlight-danger'>
+    <h3 style='color: var(--accent-red);'>⚠️ Bảo trì & Dữ liệu Hệ thống</h3>
+    <p class='text-muted' style='margin-bottom: 20px; font-size: 13px;'>
+      Các công cụ dưới đây cho phép reset dữ liệu để bàn giao triển khai cho chi
+      nhánh/cửa hàng mới hoặc tạo dữ liệu mẫu để thử nghiệm.
     </p>
 
-    <div class="danger-action-box" style="margin-bottom: 24px;">
+    <div class='danger-action-box' style='margin-bottom: 24px;'>
       <h4>🧹 Xóa toàn bộ dữ liệu (Reset Factory)</h4>
-      <p style="font-size: 13px; color: var(--text-secondary); margin: 6px 0 12px;">
-        Hành động này sẽ xóa toàn bộ Đơn sửa chữa, Báo giá, Khách hàng, Linh kiện và Tài khoản KTV. <strong>Chỉ giữ lại Danh mục và Tài khoản Admin</strong> để sẵn sàng cho cửa hàng mới vận hành.
+      <p
+        style='font-size: 13px; color: var(--text-secondary); margin: 6px 0 12px;'
+      >
+        Hành động này sẽ xóa toàn bộ Đơn sửa chữa, Báo giá, Khách hàng, Linh
+        kiện và Tài khoản KTV.
+        <strong>Chỉ giữ lại Danh mục và Tài khoản Admin</strong>
+        để sẵn sàng cho cửa hàng mới vận hành.
       </p>
-      <button class="btn btn-danger" onclick="confirmResetData()">🗑️ Xóa toàn bộ dữ liệu ngay</button>
+      <button class='btn btn-danger' onclick='confirmResetData()'>🗑️ Xóa toàn bộ
+        dữ liệu ngay</button>
     </div>
 
-    <div class="danger-action-box">
+    <div class='danger-action-box'>
       <h4>⚡ Khởi tạo 20 bộ Dữ liệu Demo</h4>
-      <p style="font-size: 13px; color: var(--text-secondary); margin: 6px 0 12px;">
-        Hệ thống sẽ tự động tạo 20 đơn sửa chữa mẫu với đầy đủ Khách hàng, Thiết bị, Ảnh chụp ngoại quan, Báo giá, Phân công KTV và Tiến độ thực tế.
+      <p
+        style='font-size: 13px; color: var(--text-secondary); margin: 6px 0 12px;'
+      >
+        Hệ thống sẽ tự động tạo 20 đơn sửa chữa mẫu với đầy đủ Khách hàng, Thiết
+        bị, Ảnh chụp ngoại quan, Báo giá, Phân công KTV và Tiến độ thực tế.
       </p>
-      <button class="btn btn-success" onclick="confirmSeedDemo()">🚀 Tạo 20 bộ Dữ liệu Demo mẫu</button>
+      <button class='btn btn-success' onclick='confirmSeedDemo()'>🚀 Tạo 20 bộ
+        Dữ liệu Demo mẫu</button>
     </div>
   </div>
 </div>
 
 <style>
-.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.card-highlight-danger { border-color: rgba(239,68,68,0.3); }
-.danger-action-box {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-@media (max-width: 900px) {
-  .settings-grid { grid-template-columns: 1fr; }
-}
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .card-highlight-danger {
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  .danger-action-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  @media (max-width: 900px) {
+    .settings-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <script>
-document.getElementById('storeSettingsForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('saveStoreBtn');
-  btn.textContent = 'Đang lưu...';
-  btn.disabled = true;
-
-  const formData = new FormData(e.target);
-  const body = Object.fromEntries(formData.entries());
-
-  try {
-    const res = await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại');
-    showToast('Đã lưu cấu hình cửa hàng thành công!');
-    setTimeout(() => window.location.reload(), 800);
-  } catch(err) {
-    showToast(err.message || 'Cập nhật thất bại', 'error');
-    btn.textContent = '💾 Lưu thông tin Cửa hàng';
-    btn.disabled = false;
-  }
-});
-
-async function confirmResetData() {
-  if (!confirm('⚠️ CẢNH BÁO CRITICAL:\nBạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu đơn hàng, khách hàng, linh kiện?\nChỉ giữ lại Danh mục và tài khoản Admin!')) return;
-
-  const adminPassword = window.prompt('Nhập mật khẩu của Admin để xác nhận xóa toàn bộ dữ liệu:');
-  if (adminPassword === null) return;
-  if (!adminPassword.trim()) {
-    showToast('Bạn phải nhập mật khẩu Admin để tiếp tục.', 'warning');
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/settings/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminPassword }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
-    await showMessageBox('Xóa Dữ Liệu Thành Công', data.message || 'Đã reset hệ thống thành công!', 'success');
-    window.location.href = '/dashboard';
-  } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); }
-}
-
-async function confirmSeedDemo() {
-  if (!confirm('Xác nhận tạo 20 bộ dữ liệu demo mẫu hoàn chỉnh? (Dữ liệu cũ chưa lưu sẽ bị reset)')) return;
-
-  try {
-    const res = await fetch('/api/settings/seed-demo', { method: 'POST' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Tạo dữ liệu demo thất bại');
-    await showMessageBox('Khởi Tạo Dữ Liệu Demo', data.message || 'Đã tạo 20 bộ dữ liệu demo thành công!', 'success');
-    window.location.href = '/dashboard';
-  } catch(err) { showToast(err.message || 'Tạo dữ liệu demo thất bại', 'error'); }
-}
+  document.getElementById('storeSettingsForm').addEventListener('submit', async
+  (e) => { e.preventDefault(); const btn =
+  document.getElementById('saveStoreBtn'); btn.textContent = 'Đang lưu...';
+  btn.disabled = true; const formData = new FormData(e.target); const body =
+  Object.fromEntries(formData.entries()); try { const res = await
+  fetch('/api/settings', { method: 'POST', headers: { 'Content-Type':
+  'application/json' }, body: JSON.stringify(body), }); const data = await
+  res.json(); if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại');
+  showToast('Đã lưu cấu hình cửa hàng thành công!'); setTimeout(() =>
+  window.location.reload(), 800); } catch(err) { showToast(err.message || 'Cập
+  nhật thất bại', 'error'); btn.textContent = '💾 Lưu thông tin Cửa hàng';
+  btn.disabled = false; } }); async function confirmResetData() { if
+  (!confirm('⚠️ CẢNH BÁO CRITICAL:\nBạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu
+  đơn hàng, khách hàng, linh kiện?\nChỉ giữ lại Danh mục và tài khoản Admin!'))
+  return; const adminPassword = window.prompt('Nhập mật khẩu của Admin để xác
+  nhận xóa toàn bộ dữ liệu:'); if (adminPassword === null) return; if
+  (!adminPassword.trim()) { showToast('Bạn phải nhập mật khẩu Admin để tiếp
+  tục.', 'warning'); return; } try { const res = await
+  fetch('/api/settings/reset', { method: 'POST', headers: { 'Content-Type':
+  'application/json' }, body: JSON.stringify({ adminPassword }), }); const data
+  = await res.json(); if (!res.ok) throw new Error(data.message || 'Xóa thất
+  bại'); await showMessageBox('Xóa Dữ Liệu Thành Công', data.message || 'Đã
+  reset hệ thống thành công!', 'success'); window.location.href = '/dashboard';
+  } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); } } async
+  function confirmSeedDemo() { if (!confirm('Xác nhận tạo 20 bộ dữ liệu demo mẫu
+  hoàn chỉnh? (Dữ liệu cũ chưa lưu sẽ bị reset)')) return; try { const res =
+  await fetch('/api/settings/seed-demo', { method: 'POST' }); const data = await
+  res.json(); if (!res.ok) throw new Error(data.message || 'Tạo dữ liệu demo
+  thất bại'); await showMessageBox('Khởi Tạo Dữ Liệu Demo', data.message || 'Đã
+  tạo 20 bộ dữ liệu demo thành công!', 'success'); window.location.href =
+  '/dashboard'; } catch(err) { showToast(err.message || 'Tạo dữ liệu demo thất
+  bại', 'error'); } }
 </script>

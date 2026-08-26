@@ -6,6 +6,7 @@ export class UserEntity {
   email: string;
   passwordHash: string;
   role: Role;
+  isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;

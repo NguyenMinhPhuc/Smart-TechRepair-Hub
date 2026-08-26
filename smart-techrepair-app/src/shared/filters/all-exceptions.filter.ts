@@ -36,11 +36,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       // SQL Server SP RAISERROR
-      if (exception.message.includes('RAISERROR') || exception.message.includes('RAISEERROR')) {
+      if (
+        exception.message.includes('RAISERROR') ||
+        exception.message.includes('RAISEERROR')
+      ) {
         status = HttpStatus.BAD_REQUEST;
         message = exception.message.split('\n')[0] ?? message;
       } else {
-        this.logger.error(`Unhandled: ${request.method} ${request.url}`, exception.stack);
+        this.logger.error(
+          `Unhandled: ${request.method} ${request.url}`,
+          exception.stack,
+        );
       }
     }
 

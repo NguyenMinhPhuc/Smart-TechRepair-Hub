@@ -52,11 +52,16 @@ async function bootstrap() {
   });
   hbs.registerHelper('formatDate', (date: Date | string) => {
     if (!date) return '';
-    return new Date(date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    return new Date(date).toLocaleString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+    });
   });
   hbs.registerHelper('formatCurrency', (amount: number) => {
     if (amount == null) return '0 ₫';
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
   });
   hbs.registerHelper('statusBadge', (status: string) => {
     const badges: Record<string, string> = {

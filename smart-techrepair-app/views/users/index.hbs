@@ -12,6 +12,7 @@
         <th>Tên đăng nhập</th>
         <th>Email</th>
         <th>Vai trò (Role)</th>
+        <th>Trạng thái</th>
         <th>Ngày tạo</th>
         <th>Thao tác</th>
       </tr>
@@ -26,14 +27,26 @@
             {{role}}
           </span>
         </td>
+        <td>
+          {{#if isActive}}
+            <span class="badge badge-success" style="background:#28a745;">Hoạt động</span>
+          {{else}}
+            <span class="badge badge-secondary" style="background:#6c757d;">Vô hiệu hóa</span>
+          {{/if}}
+        </td>
         <td>{{formatDate createdAt}}</td>
         <td>
           <button class="btn btn-sm btn-outline" onclick="openEditUserModal('{{userId}}', '{{username}}', '{{email}}', '{{role}}')">Sửa</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteUser('{{userId}}')">Xóa</button>
+          {{#if isActive}}
+            <button class="btn btn-sm btn-warning" onclick="toggleUserStatus('{{userId}}', false, '{{username}}')">Vô hiệu hóa</button>
+          {{else}}
+            <button class="btn btn-sm btn-success" onclick="toggleUserStatus('{{userId}}', true, '{{username}}')">Kích hoạt</button>
+          {{/if}}
+          <button class="btn btn-sm btn-danger" onclick="openDeleteUserModal('{{userId}}', '{{username}}')">Xóa</button>
         </td>
       </tr>
       {{else}}
-      <tr><td colspan="5" class="empty-state">Chưa có người dùng nào.</td></tr>
+      <tr><td colspan="6" class="empty-state">Chưa có người dùng nào.</td></tr>
       {{/each}}
     </tbody>
   </table>
@@ -118,6 +131,30 @@
   </div>
 </div>
 
+<!-- Modal Xác Nhận Xóa Tài Khoản -->
+<div class="modal-overlay" id="deleteUserModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="color:#e63946;">🗑️ Xác Nhận Xóa Tài Khoản</h3>
+      <button class="modal-close" onclick="closeModal('deleteUserModal')">×</button>
+    </div>
+    <form id="deleteUserForm" class="modal-body">
+      <input type="hidden" id="deleteUserId" name="userId">
+      <p style="margin-bottom:15px;">Bạn đang thực hiện xóa tài khoản <strong id="deleteTargetUsername"></strong>. Hành động này sẽ chuyển trạng thái tài khoản sang đã xóa.</p>
+      
+      <div class="form-group">
+        <label class="form-label">Nhập mật khẩu Admin của bạn để xác nhận (*)</label>
+        <input type="password" id="deleteAdminPassword" name="adminPassword" class="form-control" required placeholder="Nhập mật khẩu Admin...">
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('deleteUserModal')">Hủy</button>
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function openCreateUserModal() { document.getElementById('createUserModal').style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -127,7 +164,16 @@ function openEditUserModal(id, username, email, role) {
   document.getElementById('editUsername').value = username;
   document.getElementById('editEmail').value = email;
   document.getElementById('editRole').value = role;
+  const passwordInput = document.querySelector('#editUserForm input[name="password"]');
+  if (passwordInput) passwordInput.value = '';
   document.getElementById('editUserModal').style.display = 'flex';
+}
+
+function openDeleteUserModal(id, username) {
+  document.getElementById('deleteUserId').value = id;
+  document.getElementById('deleteTargetUsername').innerText = username;
+  document.getElementById('deleteAdminPassword').value = '';
+  document.getElementById('deleteUserModal').style.display = 'flex';
 }
 
 document.getElementById('createUserForm').addEventListener('submit', async (e) => {
@@ -153,6 +199,10 @@ document.getElementById('editUserForm').addEventListener('submit', async (e) => 
   const formData = new FormData(e.target);
   const body = Object.fromEntries(formData.entries());
   const userId = body.userId;
+  delete body.userId;
+  if (!body.password || body.password.trim() === '') {
+    delete body.password;
+  }
 
   try {
     const res = await fetch(`/api/users/${userId}`, {
@@ -161,20 +211,45 @@ document.getElementById('editUserForm').addEventListener('submit', async (e) => 
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại');
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Cập nhật thất bại'));
     showToast('Cập nhật người dùng thành công!');
     setTimeout(() => window.location.reload(), 800);
   } catch(err) { showToast(err.message || 'Cập nhật thất bại', 'error'); }
 });
 
-async function deleteUser(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) return;
+document.getElementById('deleteUserForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const userId = document.getElementById('deleteUserId').value;
+  const adminPassword = document.getElementById('deleteAdminPassword').value;
+
   try {
-    const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/users/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword }),
+    });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
-    showToast('Đã xóa tài khoản!');
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Xóa thất bại'));
+    showToast('Đã xóa tài khoản thành công!');
+    closeModal('deleteUserModal');
     setTimeout(() => window.location.reload(), 800);
   } catch(err) { showToast(err.message || 'Xóa thất bại', 'error'); }
+});
+
+async function toggleUserStatus(id, isActive, username) {
+  const actionText = isActive ? 'kích hoạt' : 'vô hiệu hóa';
+  if (!confirm(`Bạn có chắc chắn muốn ${actionText} tài khoản "${username}"?`)) return;
+
+  try {
+    const res = await fetch(`/api/users/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Thao tác thất bại'));
+    showToast(`Đã ${actionText} tài khoản thành công!`);
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Thao tác thất bại', 'error'); }
 }
 </script>

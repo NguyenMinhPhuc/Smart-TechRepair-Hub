@@ -1,0 +1,1 @@
+$w = New-Object -ComObject Word.Application; $w.Visible = $false; try { $d = $w.Documents.Open('D:\\Projects\\CongTy\\gitproject\\Smart-TechRepair-Hub\\scratch\\docx_gen\\el_28.docx'); Write-Host "PASS: 28"; $d.Close() } catch { Write-Host "FAIL: 28 - $($_.Exception.Message)" } finally { $w.Quit() }

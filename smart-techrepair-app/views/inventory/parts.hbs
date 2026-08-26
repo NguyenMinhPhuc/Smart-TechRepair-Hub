@@ -52,6 +52,7 @@
         <td><strong>{{formatCurrency Price}}</strong></td>
         <td>{{formatDate CreatedAt}}</td>
         <td>
+          <button class="btn btn-sm btn-outline" onclick="openEditPartModal('{{PartId}}', '{{Name}}', '{{CategoryId}}', '{{SerialIMEI}}', {{Price}}, '{{Status}}')">Sửa</button>
           <button class="btn btn-sm btn-danger" onclick="deletePart('{{PartId}}')">Xóa</button>
         </td>
       </tr>
@@ -114,9 +115,71 @@
   </div>
 </div>
 
+<!-- Modal Chỉnh Sửa Linh Kiện -->
+<div class="modal-overlay" id="editPartModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>✏️ Cập Nhật Thông Tin Linh Kiện</h3>
+      <button class="modal-close" onclick="closeEditPartModal()">×</button>
+    </div>
+    <form id="editPartForm" class="modal-body">
+      <input type="hidden" id="editPartId" name="partId">
+      
+      <div class="form-group">
+        <label class="form-label">Tên linh kiện (*)</label>
+        <input type="text" id="editPartName" name="name" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Danh mục (*)</label>
+        <select id="editPartCategoryId" name="categoryId" class="form-control" required>
+          {{#each categories}}
+          <option value="{{CategoryId}}">{{Name}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mã Serial / IMEI duy nhất (*)</label>
+        <input type="text" id="editPartSerialIMEI" name="serialIMEI" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Trạng thái (*)</label>
+        <select id="editPartStatus" name="status" class="form-control" required>
+          <option value="New">Mới (New)</option>
+          <option value="Used">Đã dùng (Used)</option>
+          <option value="Damaged">Hỏng (Damaged)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Đơn giá (VNĐ) (*)</label>
+        <input type="number" id="editPartPrice" name="price" class="form-control" min="0" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeEditPartModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function openCreatePartModal() { document.getElementById('createPartModal').style.display = 'flex'; }
 function closeCreatePartModal() { document.getElementById('createPartModal').style.display = 'none'; }
+
+function openEditPartModal(id, name, categoryId, serialIMEI, price, status) {
+  document.getElementById('editPartId').value = id;
+  document.getElementById('editPartName').value = name;
+  document.getElementById('editPartCategoryId').value = categoryId;
+  document.getElementById('editPartSerialIMEI').value = serialIMEI;
+  document.getElementById('editPartPrice').value = price;
+  document.getElementById('editPartStatus').value = status || 'New';
+  document.getElementById('editPartModal').style.display = 'flex';
+}
+function closeEditPartModal() { document.getElementById('editPartModal').style.display = 'none'; }
 
 document.getElementById('createPartForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -139,6 +202,32 @@ document.getElementById('createPartForm').addEventListener('submit', async (e) =
     showToast('Đã thêm linh kiện mới!');
     setTimeout(() => window.location.reload(), 800);
   } catch(err) { showToast(err.message || 'Thêm linh kiện thất bại', 'error'); }
+});
+
+document.getElementById('editPartForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const partId = formData.get('partId');
+  const body = {
+    name: formData.get('name'),
+    categoryId: formData.get('categoryId'),
+    serialIMEI: formData.get('serialIMEI'),
+    price: Number(formData.get('price')),
+    status: formData.get('status'),
+  };
+
+  try {
+    const res = await fetch(`/api/inventory/parts/${partId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Cập nhật thất bại'));
+    showToast('Cập nhật linh kiện thành công!');
+    closeEditPartModal();
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Cập nhật thất bại', 'error'); }
 });
 
 async function deletePart(id) {

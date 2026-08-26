@@ -39,8 +39,13 @@ import { AuthViewController } from '../presentation/views/auth-view.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      ServiceOrderOrmEntity, QuoteOrmEntity, PartOrmEntity,
-      CategoryOrmEntity, UserOrmEntity, CustomerOrmEntity, SystemSettingOrmEntity,
+      ServiceOrderOrmEntity,
+      QuoteOrmEntity,
+      PartOrmEntity,
+      CategoryOrmEntity,
+      UserOrmEntity,
+      CustomerOrmEntity,
+      SystemSettingOrmEntity,
     ]),
   ],
   providers: [
@@ -51,12 +56,28 @@ import { AuthViewController } from '../presentation/views/auth-view.controller';
     { provide: QUOTE_REPOSITORY, useClass: QuoteRepository },
     { provide: INVENTORY_REPOSITORY, useClass: InventoryRepository },
     { provide: SYSTEM_SETTINGS_REPOSITORY, useClass: SystemSettingsRepository },
-    ServiceOrderRepository, UserRepository, CustomerRepository, QuoteRepository, InventoryRepository, SystemSettingsRepository,
-    GetOrderUseCase, ApproveQuoteUseCase, RevenueReportUseCase, TechnicianProductivityUseCase, ManageUsersUseCase, ManageSettingsUseCase,
+    ServiceOrderRepository,
+    UserRepository,
+    CustomerRepository,
+    QuoteRepository,
+    InventoryRepository,
+    SystemSettingsRepository,
+    GetOrderUseCase,
+    ApproveQuoteUseCase,
+    RevenueReportUseCase,
+    TechnicianProductivityUseCase,
+    ManageUsersUseCase,
+    ManageSettingsUseCase,
   ],
   controllers: [
-    AuthViewController, DashboardController, TrackingViewController,
-    ServiceOrdersViewController, InventoryViewController, ReportsViewController, UsersViewController, SettingsViewController,
+    AuthViewController,
+    DashboardController,
+    TrackingViewController,
+    ServiceOrdersViewController,
+    InventoryViewController,
+    ReportsViewController,
+    UsersViewController,
+    SettingsViewController,
   ],
 })
 export class ViewsModule {}

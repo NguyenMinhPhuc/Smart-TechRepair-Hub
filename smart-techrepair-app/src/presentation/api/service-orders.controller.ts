@@ -44,9 +44,10 @@ export class ServiceOrdersController {
     return this.createOrderUseCase.execute({
       ...dto,
       photoUrl,
-      deviceType: '',
-      brand: '',
-      model: '',
+      deviceType: dto.deviceType || '',
+      brand: dto.brand || '',
+      model: dto.model || '',
+      serialIMEI: dto.serialIMEI,
     });
   }
 
@@ -92,8 +93,8 @@ export class ServiceOrdersController {
   ) {
     if (!file) throw new Error('Chưa có file ảnh.');
     const photoUrl = getPhotoUrl(file.filename);
-    // Direct insert via SP or query for photo upload
-    return { photoUrl, type, orderId: id };
+    await this.orderRepo.addPhoto(id, photoUrl, type);
+    return { photoUrl, type, orderId: id, message: 'Upload ảnh thành công.' };
   }
 
   @Patch(':id/assign')

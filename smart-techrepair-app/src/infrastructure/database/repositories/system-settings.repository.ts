@@ -25,16 +25,21 @@ export class SystemSettingsRepository implements ISystemSettingsRepository {
 
     return {
       storeName: map.get('STORE_NAME') ?? 'Smart TechRepair Hub',
-      storeAddress: map.get('STORE_ADDRESS') ?? '123 Nguyễn Văn Cừ, Q.5, TP.HCM',
+      storeAddress:
+        map.get('STORE_ADDRESS') ?? '123 Nguyễn Văn Cừ, Q.5, TP.HCM',
       storePhone: map.get('STORE_PHONE') ?? '1900-1234',
       storeEmail: map.get('STORE_EMAIL') ?? 'hotline@smartrepair.vn',
       storeLogoUrl: map.get('STORE_LOGO') ?? '/images/logo.png',
       taxCode: map.get('TAX_CODE') ?? '0312345678',
-      receiptFooterNote: map.get('RECEIPT_FOOTER_NOTE') ?? 'Cảm ơn quý khách đã tin tưởng dịch vụ của chúng tôi!',
+      receiptFooterNote:
+        map.get('RECEIPT_FOOTER_NOTE') ??
+        'Cảm ơn quý khách đã tin tưởng dịch vụ của chúng tôi!',
     };
   }
 
-  async updateSettings(settings: Partial<SystemStoreSettings>): Promise<SystemStoreSettings> {
+  async updateSettings(
+    settings: Partial<SystemStoreSettings>,
+  ): Promise<SystemStoreSettings> {
     await this.ensureSettingsTable();
 
     const keyMap: Record<keyof SystemStoreSettings, string> = {

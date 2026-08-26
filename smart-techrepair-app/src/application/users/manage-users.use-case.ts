@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../../core/domain/entities/user.entity';
 import {
@@ -21,6 +21,7 @@ export interface UpdateUserInput {
   email: string;
   role: string;
   password?: string;
+  isActive?: boolean;
 }
 
 @Injectable()
@@ -67,14 +68,44 @@ export class ManageUsersUseCase {
       email: input.email,
       role: input.role,
       passwordHash,
+      isActive: input.isActive,
     });
   }
 
-  async deleteUser(userId: string): Promise<void> {
+  async toggleUserStatus(userId: string, isActive: boolean): Promise<UserEntity> {
     const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('Người dùng không tồn tại.');
     }
+    return this.userRepo.updateStatus(userId, isActive);
+  }
+
+  async deleteUser(userId: string, adminPassword?: string, currentAdminId?: string): Promise<void> {
+    if (currentAdminId && userId === currentAdminId) {
+      throw new BadRequestException('Không thể xóa tài khoản Admin đang đăng nhập.');
+    }
+
+    if (currentAdminId) {
+      const currentAdmin = await this.userRepo.findById(currentAdminId);
+      if (!currentAdmin) {
+        throw new UnauthorizedException('Tài khoản Admin không tồn tại.');
+      }
+
+      if (!adminPassword || adminPassword.trim() === '') {
+        throw new BadRequestException('Vui lòng nhập mật khẩu Admin để xác nhận xóa.');
+      }
+
+      const isPasswordValid = await bcrypt.compare(adminPassword, currentAdmin.passwordHash);
+      if (!isPasswordValid) {
+        throw new BadRequestException('Mật khẩu Admin không chính xác.');
+      }
+    }
+
+    const user = await this.userRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại.');
+    }
+
     await this.userRepo.softDelete(userId);
   }
 }

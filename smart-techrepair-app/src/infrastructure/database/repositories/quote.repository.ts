@@ -15,7 +15,11 @@ export class QuoteRepository implements IQuoteRepository {
     private readonly sp: SpCallerService,
   ) {}
 
-  async createOrUpdate(orderId: string, totalLaborCost: number, notes?: string): Promise<QuoteEntity> {
+  async createOrUpdate(
+    orderId: string,
+    totalLaborCost: number,
+    notes?: string,
+  ): Promise<QuoteEntity> {
     await this.sp.execute('sp_CreateOrUpdateQuote', {
       OrderId: orderId,
       TotalLaborCost: totalLaborCost,
@@ -25,7 +29,11 @@ export class QuoteRepository implements IQuoteRepository {
     return this.toEntity(quote!);
   }
 
-  async addPart(orderId: string, partId: string, quantity: number): Promise<void> {
+  async addPart(
+    orderId: string,
+    partId: string,
+    quantity: number,
+  ): Promise<void> {
     await this.repo.manager.transaction(async (manager) => {
       const orderRows = await manager.query(
         `SELECT OrderId FROM ServiceOrders WHERE OrderId = @0 AND IsDeleted = 0`,
@@ -43,11 +51,15 @@ export class QuoteRepository implements IQuoteRepository {
       const part = partRows[0];
 
       if (!part) {
-        throw new BadRequestException('Không tìm thấy linh kiện phù hợp trong kho.');
+        throw new BadRequestException(
+          'Không tìm thấy linh kiện phù hợp trong kho.',
+        );
       }
 
       if (!['New', 'Used'].includes(part.Status)) {
-        throw new BadRequestException('Chỉ có thể thêm linh kiện ở trạng thái Mới hoặc Đã qua sử dụng.');
+        throw new BadRequestException(
+          'Chỉ có thể thêm linh kiện ở trạng thái Mới hoặc Đã qua sử dụng.',
+        );
       }
 
       const quoteRows = await manager.query(

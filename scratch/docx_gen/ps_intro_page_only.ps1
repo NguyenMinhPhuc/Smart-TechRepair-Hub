@@ -1,0 +1,1 @@
+$w = New-Object -ComObject Word.Application; $w.Visible = $false; try { $d = $w.Documents.Open('D:\\Projects\\CongTy\\gitproject\\Smart-TechRepair-Hub\\scratch\\docx_gen\\test_intro_page_only.docx'); Write-Host "PASS: intro_page_only"; $d.Close() } catch { Write-Host "FAIL: intro_page_only" } finally { $w.Quit() }

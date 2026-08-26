@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload) {
     const user = await this.userRepo.findById(payload.sub);
-    if (!user) throw new UnauthorizedException();
+    if (!user || user.isActive === false) throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa hoặc không tồn tại.');
     return { userId: payload.sub, email: payload.email, role: payload.role };
   }
 }

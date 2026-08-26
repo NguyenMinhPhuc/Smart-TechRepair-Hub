@@ -26,6 +26,7 @@ export class LoginUseCase {
   async execute(email: string, password: string): Promise<LoginResult> {
     const user = await this.userRepo.findByEmail(email);
     if (!user) throw new UnauthorizedException('Email hoặc mật khẩu không đúng.');
+    if (user.isActive === false) throw new UnauthorizedException('Tài khoản của bạn đã bị vô hiệu hóa.');
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) throw new UnauthorizedException('Email hoặc mật khẩu không đúng.');
@@ -41,7 +42,7 @@ export class LoginUseCase {
 
   async validateUser(email: string, password: string): Promise<UserEntity | null> {
     const user = await this.userRepo.findByEmail(email);
-    if (!user) return null;
+    if (!user || user.isActive === false) return null;
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     return isMatch ? user : null;
   }

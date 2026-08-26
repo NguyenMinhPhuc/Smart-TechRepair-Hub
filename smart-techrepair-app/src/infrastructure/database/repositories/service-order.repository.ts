@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ServiceOrderEntity } from '../../../core/domain/entities/service-order.entity';
@@ -84,6 +85,13 @@ export class ServiceOrderRepository implements IServiceOrderRepository {
   async assignTechnician(orderId: string, technicianId: string): Promise<void> {
     // Direct update via query — only for assignment (not a business state mutation)
     await this.repo.update({ orderId }, { technicianId, updatedAt: new Date() });
+  }
+
+  async addPhoto(orderId: string, photoUrl: string, photoType = 'Before'): Promise<void> {
+    const photoId = randomUUID();
+    await this.repo.query(
+      `INSERT INTO DevicePhotos (PhotoId, OrderId, PhotoUrl, PhotoType) VALUES ('${photoId}', '${orderId}', '${photoUrl}', '${photoType}')`,
+    );
   }
 
   async softDelete(orderId: string): Promise<void> {

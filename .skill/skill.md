@@ -75,3 +75,9 @@ CRITICAL RULE: DIRECT SQL QUERIES (INSERT, UPDATE, DELETE) AND DIRECT ORM DATA M
 - RBAC validation: Check user role inside Backend API before calling SP, or pass `p_user_id` to SP to assert permissions.
 - Database Transactions: ALL multi-table operations (e.g., deducting inventory + status change) MUST be wrapped inside a `BEGIN...COMMIT/ROLLBACK` block inside the Stored Procedure itself.
 - Error Handling: Use SQL `RAISE EXCEPTION` (PostgreSQL) or `SIGNAL SQLSTATE` (MySQL) to return clear business error messages to the Backend.
+
+General Rules
+- Never write raw SQL strings directly in business logic
+- Always use an ORM (Prisma/Sequelize/TypeORM) or query builder
+- All database calls must be inside try/catch blocks
+- Use transactions for multi-step operations

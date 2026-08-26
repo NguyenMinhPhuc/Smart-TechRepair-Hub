@@ -18,6 +18,26 @@ export class CreateOrderDto {
   @IsEmail({}, { message: 'Email không hợp lệ.' })
   email?: string;
 
+  @ApiPropertyOptional({ example: 'Điện thoại' })
+  @IsOptional()
+  @IsString()
+  deviceType?: string;
+
+  @ApiPropertyOptional({ example: 'Apple' })
+  @IsOptional()
+  @IsString()
+  brand?: string;
+
+  @ApiPropertyOptional({ example: 'iPhone 13' })
+  @IsOptional()
+  @IsString()
+  model?: string;
+
+  @ApiPropertyOptional({ example: 'SN123456' })
+  @IsOptional()
+  @IsString()
+  serialIMEI?: string;
+
   @ApiProperty({ example: 'Màn hình bị vỡ, không nhận sạc' })
   @IsString()
   @IsNotEmpty({ message: 'Mô tả lỗi không được để trống.' })

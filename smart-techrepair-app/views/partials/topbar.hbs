@@ -1,22 +1,26 @@
-<header class="topbar">
-  <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle">☰</button>
-  <div class="topbar-title">{{title}}</div>
-  <div class="topbar-search" id="topbarSearch">
+<header class='topbar'>
+  <button
+    class='sidebar-toggle'
+    onclick='toggleSidebar()'
+    id='sidebarToggle'
+  >☰</button>
+  <div class='topbar-title'>{{title}}</div>
+  <div class='topbar-search' id='topbarSearch'>
     <input
-      type="text"
-      id="featureSearchInput"
-      class="topbar-search-input"
-      placeholder="Tìm và mở chức năng..."
-      autocomplete="off"
-    >
-    <div class="topbar-search-results" id="featureSearchResults" hidden></div>
+      type='text'
+      id='featureSearchInput'
+      class='topbar-search-input'
+      placeholder='Tìm và mở chức năng...'
+      autocomplete='off'
+    />
+    <div class='topbar-search-results' id='featureSearchResults' hidden></div>
   </div>
-  <div class="topbar-actions">
-    <div class="user-badge">
-      <span class="user-avatar">👤</span>
-      <span class="user-name" id="currentUserName">Đang tải...</span>
-      <span class="user-role" id="currentUserRole"></span>
+  <div class='topbar-actions'>
+    <div class='user-badge'>
+      <span class='user-avatar'>👤</span>
+      <span class='user-name' id='currentUserName'>Đang tải...</span>
+      <span class='user-role' id='currentUserRole'></span>
     </div>
-    <button class="btn btn-outline-sm" onclick="logout()">Đăng xuất</button>
+    <button class='btn btn-outline-sm' onclick='logout()'>Đăng xuất</button>
   </div>
 </header>

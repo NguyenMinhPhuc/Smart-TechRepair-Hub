@@ -1,8 +1,23 @@
 import {
-  Controller, Get, Post, Delete, Body, Param, ParseUUIDPipe, Query, HttpCode, HttpStatus,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateCategoryDto, CreatePartDto } from '../dtos/inventory/create-part.dto';
+import {
+  CreateCategoryDto,
+  CreatePartDto,
+  UpdatePartDto,
+  UpdateCategoryDto,
+} from '../dtos/inventory/create-part.dto';
 import { ManageInventoryUseCase } from '../../application/inventory/manage-inventory.use-case';
 import { Roles } from '../decorators/roles.decorator';
 import { Role } from '../../core/domain/enums/role.enum';
@@ -27,11 +42,18 @@ export class InventoryController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
-    return this.inventoryUseCase.listParts({ categoryId, status, page: Number(page), limit: Number(limit) });
+    return this.inventoryUseCase.listParts({
+      categoryId,
+      status,
+      page: Number(page),
+      limit: Number(limit),
+    });
   }
 
   @Get('parts/search')
-  @ApiOperation({ summary: 'Tìm kiếm linh kiện gần đúng (Fuzzy/Accent-Insensitive)' })
+  @ApiOperation({
+    summary: 'Tìm kiếm linh kiện gần đúng (Fuzzy/Accent-Insensitive)',
+  })
   async searchParts(@Query('q') query = '') {
     const raw = (query || '').trim();
     if (!raw) return [];
@@ -84,6 +106,16 @@ export class InventoryController {
     return this.inventoryUseCase.createPart(dto);
   }
 
+  @Put('parts/:id')
+  @Roles(Role.ADMIN, Role.TECHNICIAN)
+  @ApiOperation({ summary: 'Cập nhật thông tin linh kiện' })
+  async updatePart(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePartDto,
+  ) {
+    return this.inventoryUseCase.updatePart({ partId: id, ...dto });
+  }
+
   @Delete('parts/:id')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -105,6 +137,16 @@ export class InventoryController {
   @ApiOperation({ summary: 'Thêm danh mục linh kiện' })
   async createCategory(@Body() dto: CreateCategoryDto) {
     return this.inventoryUseCase.createCategory(dto.name, dto.description);
+  }
+
+  @Put('categories/:id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Cập nhật danh mục linh kiện' })
+  async updateCategory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCategoryDto,
+  ) {
+    return this.inventoryUseCase.updateCategory(id, dto.name, dto.description);
   }
 
   @Delete('categories/:id')

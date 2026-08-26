@@ -17,6 +17,9 @@ export class UserOrmEntity {
   @Column({ name: 'Role', length: 20 })
   role: string;
 
+  @Column({ name: 'IsActive', type: 'bit', default: true })
+  isActive: boolean;
+
   @Column({ name: 'IsDeleted', type: 'bit', default: false })
   isDeleted: boolean;
 

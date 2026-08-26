@@ -26,6 +26,7 @@
         <td><span class="badge badge-info">{{PartCount}} linh kiện</span></td>
         <td>{{formatDate CreatedAt}}</td>
         <td>
+          <button class="btn btn-sm btn-outline" onclick="openEditCatModal('{{CategoryId}}', '{{Name}}', '{{Description}}')">Sửa</button>
           <button class="btn btn-sm btn-danger" onclick="deleteCategory('{{CategoryId}}')">Xóa</button>
         </td>
       </tr>
@@ -62,9 +63,45 @@
   </div>
 </div>
 
+<!-- Modal Chỉnh Sửa Danh Mục -->
+<div class="modal-overlay" id="editCatModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>✏️ Cập Nhật Danh Mục Linh Kiện</h3>
+      <button class="modal-close" onclick="closeEditCatModal()">×</button>
+    </div>
+    <form id="editCatForm" class="modal-body">
+      <input type="hidden" id="editCatId" name="categoryId">
+      
+      <div class="form-group">
+        <label class="form-label">Tên danh mục (*)</label>
+        <input type="text" id="editCatName" name="name" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mô tả chi tiết</label>
+        <textarea id="editCatDescription" name="description" class="form-control" rows="3" placeholder="Mô tả về loại linh kiện trong danh mục này..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeEditCatModal()">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 function openCreateCatModal() { document.getElementById('createCatModal').style.display = 'flex'; }
 function closeCreateCatModal() { document.getElementById('createCatModal').style.display = 'none'; }
+
+function openEditCatModal(id, name, description) {
+  document.getElementById('editCatId').value = id;
+  document.getElementById('editCatName').value = name;
+  document.getElementById('editCatDescription').value = description || '';
+  document.getElementById('editCatModal').style.display = 'flex';
+}
+function closeEditCatModal() { document.getElementById('editCatModal').style.display = 'none'; }
 
 document.getElementById('createCatForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -85,6 +122,29 @@ document.getElementById('createCatForm').addEventListener('submit', async (e) =>
     showToast('Đã tạo danh mục mới!');
     setTimeout(() => window.location.reload(), 800);
   } catch(err) { showToast(err.message || 'Tạo danh mục thất bại', 'error'); }
+});
+
+document.getElementById('editCatForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const catId = formData.get('categoryId');
+  const body = {
+    name: formData.get('name'),
+    description: formData.get('description'),
+  };
+
+  try {
+    const res = await fetch(`/api/inventory/categories/${catId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : (data.message || 'Cập nhật danh mục thất bại'));
+    showToast('Cập nhật danh mục thành công!');
+    closeEditCatModal();
+    setTimeout(() => window.location.reload(), 800);
+  } catch(err) { showToast(err.message || 'Cập nhật danh mục thất bại', 'error'); }
 });
 
 async function deleteCategory(id) {

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Render, UseGuards, Req, Redirect, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Render,
+  UseGuards,
+  Req,
+  Redirect,
+  Query,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { DataSource } from 'typeorm';
 import { Request } from 'express';
@@ -52,7 +63,16 @@ export class ServiceOrdersViewController {
       page: Number(page),
       limit,
       currentStatus: status ?? '',
-      statuses: ['Created', 'Inspecting', 'Quoted', 'Approved', 'Rejected', 'Repairing', 'Completed', 'Cancelled'],
+      statuses: [
+        'Created',
+        'Inspecting',
+        'Quoted',
+        'Approved',
+        'Rejected',
+        'Repairing',
+        'Completed',
+        'Cancelled',
+      ],
     };
   }
 
@@ -92,10 +112,21 @@ export class ServiceOrdersViewController {
 
     if (!order[0]) return { title: 'Không tìm thấy', notFound: true };
 
+    const mappedPhotos = (photos || []).map((p: any) => ({
+      PhotoId: p.PhotoId || p.photoId,
+      PhotoUrl: p.PhotoUrl || p.photoUrl,
+      PhotoType: p.PhotoType || p.photoType,
+      UploadedAt: p.UploadedAt || p.uploadedAt,
+      photoId: p.PhotoId || p.photoId,
+      photoUrl: p.PhotoUrl || p.photoUrl,
+      photoType: p.PhotoType || p.photoType,
+      uploadedAt: p.UploadedAt || p.uploadedAt,
+    }));
+
     return {
       title: `Đơn ${order[0].TrackingCode}`,
       order: order[0],
-      photos,
+      photos: mappedPhotos,
       quote: quote[0] ?? null,
       parts,
       technicians,
@@ -126,7 +157,10 @@ export class ServiceOrdersViewController {
     const protocol = req.protocol ?? 'http';
     const trackingUrl = `${protocol}://${host}/tracking?code=${order.TrackingCode}&phone=${order.Phone}`;
 
-    const qrCodeDataUrl = await QRCode.toDataURL(trackingUrl, { margin: 1, width: 180 });
+    const qrCodeDataUrl = await QRCode.toDataURL(trackingUrl, {
+      margin: 1,
+      width: 180,
+    });
 
     return {
       layout: 'layouts/auth',
